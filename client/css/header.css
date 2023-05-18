@@ -1,0 +1,270 @@
+header {
+  position: fixed;
+  top: 0;
+  display: flex;
+  align-items: flex-end;
+  background-color: var(--white);
+  height: 100px;
+  width: 100%;
+  padding: 26px 54px 26px 60px;
+  z-index: 3;
+}
+
+.logo {
+  height: 48px;
+  width: 259px;
+  margin-right: 91px;
+}
+
+.logo--hidden {
+  display: none;
+}
+
+.header__menu {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.menu__item {
+  width: 100px;
+  font-size: 20px;
+  margin-left: 5px;
+  margin-right: 11px;
+  letter-spacing: 30px;
+  color: #3f3a3a;
+  text-decoration: none;
+}
+
+.menu__item:hover {
+  color: var(--sepia);
+}
+
+.item--active {
+  color: var(--sepia);
+}
+
+.menu__block {
+  width: 34px;
+  height: 20px;
+  border-left: var(--black) 2px solid;
+}
+
+.header__actions {
+  display: flex;
+  margin-left: auto;
+}
+
+.header__actions div, a {
+  margin-right: 42px;
+}
+
+.header__actions div:last-child {
+  margin-right: 0px;
+}
+
+.action__search {
+  display: flex;
+  width: 214px;
+  padding: 0px;
+}
+
+.search:hover img {
+  content: url('/images/search-hover.png');
+}
+
+.search__input {
+  width: 214px;
+  height: 40px;
+  padding: 6px 17px 6px 20px;
+  padding-right: 64px;
+  border: solid 1px #979797;
+  border-radius: 20px;
+  caret-color: var(--sepia);
+  color: var(--sepia);
+  font-size: 20px;
+}
+
+.search__input:hover {
+  border-color: var(--sepia);
+}
+
+.action__item {
+  position: relative;
+  width: 44px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cart__count {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 24px;
+  width: 24px;
+  background-color: var(--sepia);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.cart--invisible {
+  visibility: hidden;
+}
+
+.search__icon {
+  margin-left: -52px;
+}
+
+.actions__cart:hover {
+  content: url('/images/cart-hover.png');
+}
+
+.actions__member:hover {
+  content: url('/images/member-hover.png');
+}
+
+.separator {
+  position: fixed;
+  top: 100px;
+  height: 40px;
+  width: 100%;
+  background-color: var(--charcoal-grey);
+  z-index: 3;
+}
+
+.menu {
+  display: none;
+}
+
+.actions {
+  display: none;
+}
+
+.search__input--mobile {
+  display: none;
+  width: 100%;
+  height: 40px;
+  border-radius: 20px;
+  caret-color: var(--sepia);
+  color: var(--sepia);
+  border: 2px solid var(--sepia);
+  padding: 0px 15px;
+}
+
+.input__mobile--focus {
+  display: block;
+}
+
+@media (max-width: 1279px) {
+  header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    height: 52px;
+    width: 100%;
+    padding: 4px 10px;
+  }
+
+  .logo {
+    height: 24px;
+    width: auto;
+    margin: 0px;
+  }
+
+  .logo__img {
+    height: 24px;
+  }
+
+  .header__search {
+    position: absolute;
+    right: 15px;
+  }
+
+  .search__icon {
+    width: 30px;
+    height: 30px;
+    margin-left: 0px;
+  }
+
+  .header__menu {
+    display: none;
+  }
+
+  .header__actions {
+    display: none;
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .menu {
+    position: fixed;
+    top: 52px;
+    display: flex;
+    background-color: var(--charcoal-grey);
+    align-items: center;
+    justify-content: space-around;
+    height: 50px;
+    width: 100%;
+    padding: 0px 16px;
+  }
+
+  .menu__item {
+    width: 32px;
+    margin: 0px;
+    letter-spacing: normal;
+    color:  var(--grey);
+    font-size: 16px;
+  }
+
+  .item--active {
+    color: var(--white);
+  }
+
+  .menu__block {
+    width: 1px;
+    height: 16px;
+    border-left: var(--grey) 1px solid;
+  }
+
+  .actions {
+    position: fixed;
+    bottom: 0;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--charcoal-grey);
+  }
+
+  .action__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+  }
+
+  .action__text {
+    font-size: 16px;
+  }
+
+  .actions__cart, .actions__member {
+    width: 40px;
+    height: 40px;
+  }
+
+  .actions__block {
+    width: 1px;
+    height: 24px;
+    border-left: var(--grey) 1px solid;
+  }
+}

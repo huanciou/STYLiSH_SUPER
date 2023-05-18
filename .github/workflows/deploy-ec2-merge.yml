@@ -1,0 +1,24 @@
+name: Deploy to EC2 on merge
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: deploy to ec2
+        uses: appleboy/ssh-action@master
+        with:
+          host: '${{ secrets.HOST_DNS }}'
+          username: '${{ secrets.EC2_USERNAME }}'
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Hello from github action, start deploy main to ec2"
+            cd /home/ec2-user/Developer/Stylish
+            git switch main
+            git pull
+            npm install
+            npm run build
+            npx pm2 restart stylish

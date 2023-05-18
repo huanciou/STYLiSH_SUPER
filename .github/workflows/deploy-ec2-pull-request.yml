@@ -1,0 +1,24 @@
+name: Deploy to EC2 on PR
+'on': pull_request
+jobs:
+  build_and_preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: deploy to ec2
+        uses: appleboy/ssh-action@master
+        env:
+          BRANCH: ${{ github.head_ref }}
+        with:
+          host: '${{ secrets.HOST_DNS }}'
+          username: '${{ secrets.EC2_USERNAME }}'
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: BRANCH
+          script: |
+            echo "Hello from github action, start deploy ${BRANCH} to ec2"
+            cd /home/ec2-user/Developer/Stylish/server
+            git pull
+            git switch $BRANCH
+            npm install
+            npm run build
+            npx pm2 restart stylish
