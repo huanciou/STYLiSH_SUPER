@@ -32,7 +32,7 @@ CREATE TABLE `campaigns` (
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `campaigns_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,7 @@ CREATE TABLE `order_details` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,7 +97,7 @@ CREATE TABLE `order_recipients` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   CONSTRAINT `order_recipients_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +133,7 @@ CREATE TABLE `orders` (
   KEY `user_id` (`user_id`),
   KEY `number` (`number`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -164,7 +164,7 @@ CREATE TABLE `product_images` (
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=429 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=432 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -194,7 +194,7 @@ CREATE TABLE `product_variants` (
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `product_variants_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=402 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=405 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,7 +203,7 @@ CREATE TABLE `product_variants` (
 
 LOCK TABLES `product_variants` WRITE;
 /*!40000 ALTER TABLE `product_variants` DISABLE KEYS */;
-INSERT INTO `product_variants` VALUES (324,147,'#FFFFFF','S',1,'白色'),(325,147,'#FFFFFF','M',1,'白色'),(326,147,'#FFFFFF','L',2,'白色'),(327,147,'#DDFFBB','S',9,'亮綠'),(328,147,'#DDFFBB','M',0,'亮綠'),(329,147,'#DDFFBB','L',5,'亮綠'),(330,147,'#CCCCCC','S',8,'淺灰'),(331,147,'#CCCCCC','M',5,'淺灰'),(332,147,'#CCCCCC','L',9,'淺灰'),(333,148,'#DDFFBB','S',7,'亮綠'),(334,148,'#DDFFBB','M',5,'亮綠'),(335,148,'#DDFFBB','L',8,'亮綠'),(336,148,'#CCCCCC','S',1,'淺灰'),(337,148,'#CCCCCC','M',6,'淺灰'),(338,148,'#CCCCCC','L',2,'淺灰'),(339,149,'#DDFFBB','S',3,'亮綠'),(340,149,'#DDFFBB','M',5,'亮綠'),(341,149,'#CCCCCC','S',4,'淺灰'),(342,149,'#CCCCCC','M',1,'淺灰'),(343,149,'#BB7744','S',2,'淺棕'),(344,149,'#BB7744','M',6,'淺棕'),(345,150,'#DDF0FF','S',8,'淺藍'),(346,150,'#DDF0FF','M',5,'淺藍'),(347,150,'#DDF0FF','L',6,'淺藍'),(348,150,'#CCCCCC','S',0,'淺灰'),(349,150,'#CCCCCC','M',6,'淺灰'),(350,150,'#CCCCCC','L',5,'淺灰'),(351,150,'#334455','S',2,'深藍'),(352,150,'#334455','M',7,'深藍'),(353,150,'#334455','L',9,'深藍'),(354,151,'#FFFFFF','M',5,'白色'),(355,151,'#FFFFFF','L',7,'白色'),(356,151,'#FFFFFF','XL',1,'白色'),(357,151,'#DDF0FF','M',1,'淺藍'),(358,151,'#DDF0FF','L',4,'淺藍'),(359,151,'#DDF0FF','XL',3,'淺藍'),(360,152,'#FFFFFF','S',10,'白色'),(361,152,'#FFFFFF','M',5,'白色'),(362,152,'#FFFFFF','L',6,'白色'),(363,152,'#CCCCCC','S',1,'淺灰'),(364,152,'#CCCCCC','M',3,'淺灰'),(365,152,'#CCCCCC','L',10,'淺灰'),(366,153,'#334455','S',9,'深藍'),(367,153,'#334455','M',5,'深藍'),(368,153,'#334455','L',1,'深藍'),(369,153,'#334455','XL',9,'深藍'),(370,154,'#DDF0FF','M',7,'淺藍'),(371,154,'#DDF0FF','L',1,'淺藍'),(372,154,'#BB7744','M',3,'淺棕'),(373,154,'#BB7744','L',1,'淺棕'),(374,155,'#BB7744','M',5,'淺棕'),(375,155,'#BB7744','L',1,'淺棕'),(376,155,'#334455','M',5,'深藍'),(377,155,'#334455','L',2,'深藍'),(378,156,'#FFFFFF','F',1,'白色'),(379,156,'#FFDDDD','F',1,'粉紅'),(380,157,'#FFFFFF','F',4,'白色'),(381,157,'#DDF0FF','F',7,'淺藍'),(382,158,'#FFFFFF','S',0,'白色'),(383,158,'#FFFFFF','M',9,'白色'),(384,158,'#FFDDDD','S',2,'粉紅'),(385,158,'#FFDDDD','M',1,'粉紅'),(386,159,'#DDFFBB','M',3,'亮綠'),(387,159,'#DDFFBB','L',9,'亮綠'),(388,159,'#DDF0FF','M',2,'淺藍'),(389,159,'#DDF0FF','L',6,'淺藍'),(390,160,'#FFFFFF','M',2,'白色'),(391,160,'#FFFFFF','L',6,'白色'),(392,160,'#CCCCCC','M',5,'淺灰'),(393,160,'#CCCCCC','L',8,'淺灰'),(394,161,'#FFFFFF','S',9,'白色'),(395,161,'#FFFFFF','M',4,'白色'),(396,161,'#FFFFFF','L',2,'白色'),(397,161,'#DDF0FF','S',0,'淺藍'),(398,161,'#DDF0FF','M',10,'淺藍'),(399,161,'#DDF0FF','L',5,'淺藍');
+INSERT INTO `product_variants` VALUES (324,147,'#FFFFFF','S',1,'白色'),(325,147,'#FFFFFF','M',1,'白色'),(326,147,'#FFFFFF','L',2,'白色'),(327,147,'#DDFFBB','S',9,'亮綠'),(328,147,'#DDFFBB','M',0,'亮綠'),(329,147,'#DDFFBB','L',5,'亮綠'),(330,147,'#CCCCCC','S',8,'淺灰'),(331,147,'#CCCCCC','M',5,'淺灰'),(332,147,'#CCCCCC','L',9,'淺灰'),(333,148,'#DDFFBB','S',7,'亮綠'),(334,148,'#DDFFBB','M',5,'亮綠'),(335,148,'#DDFFBB','L',8,'亮綠'),(336,148,'#CCCCCC','S',1,'淺灰'),(337,148,'#CCCCCC','M',6,'淺灰'),(338,148,'#CCCCCC','L',2,'淺灰'),(339,149,'#DDFFBB','S',3,'亮綠'),(340,149,'#DDFFBB','M',5,'亮綠'),(341,149,'#CCCCCC','S',4,'淺灰'),(342,149,'#CCCCCC','M',1,'淺灰'),(343,149,'#BB7744','S',2,'淺棕'),(344,149,'#BB7744','M',6,'淺棕'),(345,150,'#DDF0FF','S',8,'淺藍'),(346,150,'#DDF0FF','M',5,'淺藍'),(347,150,'#DDF0FF','L',6,'淺藍'),(348,150,'#CCCCCC','S',0,'淺灰'),(349,150,'#CCCCCC','M',6,'淺灰'),(350,150,'#CCCCCC','L',5,'淺灰'),(351,150,'#334455','S',2,'深藍'),(352,150,'#334455','M',7,'深藍'),(353,150,'#334455','L',9,'深藍'),(354,151,'#FFFFFF','M',5,'白色'),(355,151,'#FFFFFF','L',7,'白色'),(356,151,'#FFFFFF','XL',1,'白色'),(357,151,'#DDF0FF','M',1,'淺藍'),(358,151,'#DDF0FF','L',4,'淺藍'),(359,151,'#DDF0FF','XL',3,'淺藍'),(360,152,'#FFFFFF','S',10,'白色'),(361,152,'#FFFFFF','M',5,'白色'),(362,152,'#FFFFFF','L',6,'白色'),(363,152,'#CCCCCC','S',1,'淺灰'),(364,152,'#CCCCCC','M',3,'淺灰'),(365,152,'#CCCCCC','L',9,'淺灰'),(366,153,'#334455','S',9,'深藍'),(367,153,'#334455','M',5,'深藍'),(368,153,'#334455','L',1,'深藍'),(369,153,'#334455','XL',9,'深藍'),(370,154,'#DDF0FF','M',7,'淺藍'),(371,154,'#DDF0FF','L',1,'淺藍'),(372,154,'#BB7744','M',3,'淺棕'),(373,154,'#BB7744','L',1,'淺棕'),(374,155,'#BB7744','M',5,'淺棕'),(375,155,'#BB7744','L',1,'淺棕'),(376,155,'#334455','M',5,'深藍'),(377,155,'#334455','L',2,'深藍'),(378,156,'#FFFFFF','F',1,'白色'),(379,156,'#FFDDDD','F',1,'粉紅'),(380,157,'#FFFFFF','F',4,'白色'),(381,157,'#DDF0FF','F',7,'淺藍'),(382,158,'#FFFFFF','S',0,'白色'),(383,158,'#FFFFFF','M',9,'白色'),(384,158,'#FFDDDD','S',2,'粉紅'),(385,158,'#FFDDDD','M',1,'粉紅'),(386,159,'#DDFFBB','M',3,'亮綠'),(387,159,'#DDFFBB','L',9,'亮綠'),(388,159,'#DDF0FF','M',2,'淺藍'),(389,159,'#DDF0FF','L',6,'淺藍'),(390,160,'#FFFFFF','M',2,'白色'),(391,160,'#FFFFFF','L',6,'白色'),(392,160,'#CCCCCC','M',5,'淺灰'),(393,160,'#CCCCCC','L',8,'淺灰'),(394,161,'#FFFFFF','S',9,'白色'),(395,161,'#FFFFFF','M',4,'白色'),(396,161,'#FFFFFF','L',2,'白色'),(397,161,'#DDF0FF','S',0,'淺藍'),(398,161,'#DDF0FF','M',10,'淺藍'),(399,161,'#DDF0FF','L',5,'淺藍');
 /*!40000 ALTER TABLE `product_variants` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,7 +228,7 @@ CREATE TABLE `products` (
   PRIMARY KEY (`id`),
   KEY `category` (`category`),
   KEY `title` (`title`)
-) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,7 +261,6 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES (2,'admin');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -282,7 +281,7 @@ CREATE TABLE `user_providers` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `user_providers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -291,7 +290,6 @@ CREATE TABLE `user_providers` (
 
 LOCK TABLES `user_providers` WRITE;
 /*!40000 ALTER TABLE `user_providers` DISABLE KEYS */;
-INSERT INTO `user_providers` VALUES (10,19,'native','$argon2id$v=19$m=65536,t=3,p=4$OaUYphLDaSD7tJ+VcV6WYg$h6pWZE71MFm1AzeYtkL2h1ogbTSpd+f6zKmEKnJrN8g','2023-05-13 07:46:38','2023-05-13 07:46:38');
 /*!40000 ALTER TABLE `user_providers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -318,7 +316,6 @@ CREATE TABLE `user_role` (
 
 LOCK TABLES `user_role` WRITE;
 /*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-INSERT INTO `user_role` VALUES (19,2);
 /*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -338,7 +335,7 @@ CREATE TABLE `users` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,7 +344,6 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (19,'admin@email.com','admin',NULL,'2023-05-13 07:46:38','2023-05-13 07:46:38');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -360,4 +356,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-13 15:51:28
+-- Dump completed on 2023-05-18 22:30:18
