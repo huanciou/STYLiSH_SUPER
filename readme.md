@@ -3,7 +3,7 @@
 ## Deployment
 
 1. Start MySQL server
-2. Import database: `mysql -u <user_name> -p <db_name> < stylish_backend.sql`
+2. Import database: `mysql -u <user_name> -p <db_name> < backup.sql`
 3. Create config: `.env` for back-end (You can copy the schema from template: `.env-template`)
 4. Install server dependencies `npm install`
 5. Create admin role and user: `npm run db:seeds initAdmin.js`
