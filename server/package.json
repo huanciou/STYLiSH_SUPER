@@ -12,6 +12,9 @@
     "queue": "node --watch queue",
     "db:seeds": "node db/setupSeeds.js"
   },
+  "engines" : { 
+    "node" : ">=18.16.0"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
