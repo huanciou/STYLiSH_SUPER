@@ -12,6 +12,7 @@ import rateLimiter from "./middleware/rateLimiter.js";
 import { errorHandler } from "./utils/errorHandler.js";
 import morganBody from 'morgan-body';
 import fs from 'fs';
+import './models/mongo.js';
 
 const app = express();
 const port = 3000;
