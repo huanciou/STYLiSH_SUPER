@@ -1,0 +1,114 @@
+
+Request: GET / at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.544 ms 
+
+Request: GET /css/global.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.126 ms 
+
+Request: GET /css/carousel.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.616 ms 
+
+Request: GET /css/main.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.816 ms 
+
+Request: GET /css/products.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.605 ms 
+
+Request: GET /css/header.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.099 ms 
+
+Request: GET /css/footer.css at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.971 ms 
+
+Request: GET /js/carousel.js at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.759 ms 
+
+Request: GET /js/products.js at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.396 ms 
+
+Request: GET /js/footer.js at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.636 ms 
+
+Request: GET /js/firebase.js at Sat Nov 04 2023 14:28:31 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.691 ms 
+
+Request: GET /js/api.const.js at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.589 ms 
+
+Request: GET /images/line.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 8.262 ms 
+
+Request: GET /images/twitter.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 9.317 ms 
+
+Request: GET /images/facebook.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 10.935 ms 
+
+Request: GET /js/header.js at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.715 ms 
+
+Request: GET /api/marketing/campaigns at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response Body:
+{
+	"data": [
+		{
+			"id": 12,
+			"product_id": 148,
+			"story": "瞬間\r\n在城市的角落\r\n找到失落多時的記憶。\r\n印象《都會故事集》",
+			"picture": "/assets/201807202140/keyvisual.jpg"
+		},
+		{
+			"id": 13,
+			"product_id": 153,
+			"story": "永遠\r\n展現自信與專業\r\n無法抵擋的男人魅力。\r\n復古《再一次經典》",
+			"picture": "/assets/201807242222/keyvisual.jpg"
+		},
+		{
+			"id": 14,
+			"product_id": 154,
+			"story": "於是\r\n我也想要給你\r\n一個那麼美好的自己。\r\n不朽《與自己和好如初》",
+			"picture": "/assets/201807242228/keyvisual.jpg"
+		}
+	]
+}
+Response: 304 34.751 ms 
+
+Request: GET /js/actionItems.js at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 7.509 ms 
+
+Request: GET /api/products/all?paging=0 at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response Body:
+{
+	"data": []
+}
+Response: 500 38.388 ms 
+
+Request: GET /assets/201807202140/keyvisual.jpg at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.114 ms 
+
+Request: GET /assets/201807242222/keyvisual.jpg at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.323 ms 
+
+Request: GET /assets/201807242228/keyvisual.jpg at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 2.319 ms 
+
+Request: GET /js/cart.js at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.266 ms 
+
+Request: GET /images/cart-mobile.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.507 ms 
+
+Request: GET /images/member-mobile.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.818 ms 
+
+Request: GET /images/logo.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.495 ms 
+
+Request: GET /images/search.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.152 ms 
+
+Request: GET /images/cart.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 1.093 ms 
+
+Request: GET /images/member.png at Sat Nov 04 2023 14:28:32 GMT+0800, IP: ::1, User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Response: 304 0.705 ms 
