@@ -10,6 +10,8 @@ import authenticate from "./middleware/authenticate.js";
 import authorization from "./middleware/authorization.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import { errorHandler } from "./utils/errorHandler.js";
+import morganBody from 'morgan-body';
+import fs from 'fs';
 
 const app = express();
 const port = 3000;
@@ -25,6 +27,13 @@ router.use(function (req, res, next) {
 });
 
 app.use(express.json());
+
+// log
+const log = fs.createWriteStream('./logs/morganBody/morganBody.log', { flags: "a" })
+morganBody(app, {
+  noColors: true,
+  stream: log,
+})
 
 app.use("/api", rateLimiter, [
   productRouter,
@@ -50,3 +59,29 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`STYLiSH listening on port ${port}`);
 });
+
+const outputLogStream = fs.createWriteStream('./logs/console/console.log', { flags: 'a' })
+
+if (process.env.SERVER_STATUS === 'production') {
+
+  const originalConsoleLog = console.log;
+  console.log = (...args) => {
+    const message = args.join(' ')
+    outputLogStream.write(message + '\n');
+    originalConsoleLog(...args)
+  }
+
+  const originalConsoleError = console.error
+  console.error = (...args) => {
+    const message = args.join(' ')
+    outputLogStream.write(`[ERROR] ${message}\n`)
+
+    for (const arg of args) {
+      if (arg instanceof Error) {
+        outputLogStream.write(`[ERROR Stack Trace] ${arg.stack}\n`);
+      }
+    }
+
+    originalConsoleError(...args)
+  }
+}
