@@ -8,3 +8,6 @@ uploads/*
 /db/dbVersion.txt
 
 .DS_Store
+
+logs/console/console.log
+logs/morganBody/morganBody.log
