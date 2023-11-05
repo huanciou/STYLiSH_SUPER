@@ -9,5 +9,5 @@ uploads/*
 
 .DS_Store
 
-logs/console/console.log
-logs/morganBody/morganBody.log
+/logs/console/console.log
+/logs/morganBody/morganBody.log
