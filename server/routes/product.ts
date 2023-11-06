@@ -30,7 +30,12 @@ router
 
 router
   .route("/products/details")
-  .get(query("id").not().isEmpty().trim(), validator.handleResult, whoRU, getProduct);
+  .get(
+    query("id").not().isEmpty().trim(),
+    validator.handleResult,
+    whoRU,
+    getProduct
+  );
 
 router
   .route("/products/:category")
@@ -40,7 +45,17 @@ router
     validator.handleResult,
     getProducts
   );
-
+////
+// router.route("/pd").post(
+//   (req: Request, res: Response, next: NextFunction) => {
+//     uploadProductsToElasticSearch(req.body);
+//     next();
+//   },
+//   (req: Request, res: Response) => {
+//     res.send("upload");
+//   }
+// );
+////
 router.route("/product").post(
   uploadToBuffer.fields([
     { name: "main_image", maxCount: 1 },

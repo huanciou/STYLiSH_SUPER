@@ -10,7 +10,6 @@ import {
 } from "../controllers/product.js";
 import { uploadToBuffer } from "../middleware/multer.js";
 import * as validator from "../middleware/validator.js";
-import whoRU from "../middleware/whoRU.js";
 const router = Router();
 router.route("/products").get(getProducts);
 router
