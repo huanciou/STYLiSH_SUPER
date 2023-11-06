@@ -51,7 +51,8 @@ export async function getProduct(req, res) {
         const queueKey = `${userId}BrowsingHistory`;
         const sortedSetKey = `${userId}BrowsingHistoryCounter`;
         const maxQueueSize = 10;
-        const tags = productData?.tags;
+        // const tags = productData?.tags
+        const tags = ["隨性", "89"];
         tags?.forEach(async (tag) => {
             await redis.lpush(queueKey, tag);
             await redis.zincrby(sortedSetKey, 1, tag);
@@ -207,7 +208,7 @@ export async function recommendProduct(req, res) {
         else {
             tag = null;
         }
-        if (!tag) {
+        if (tag) {
             const productsData = await product.find({ tags: { $in: tag } });
             return res.status(200).json({ data: [productsData] });
         }

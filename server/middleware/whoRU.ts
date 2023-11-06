@@ -3,6 +3,7 @@ import verifyJWT from "../utils/verifyJWT.js";
 
 async function whoRU(req: Request, res: Response, next: NextFunction) {
     try {
+        console.log(222)
         const tokenInHeaders = req.get("Authorization");
         const token =
             tokenInHeaders?.replace("Bearer ", "");

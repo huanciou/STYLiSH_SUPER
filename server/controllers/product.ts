@@ -269,8 +269,8 @@ export async function recommendProduct(req: Request, res: Response) {
       tag = null;
     }
 
-    if (!tag) {
-      const productsData = await product.find({ tags: { $in: tag } });
+    if (tag) {
+      const productsData = await product.find({ tags: { $in: tag } })
 
       return res.status(200).json({ data: [productsData] });
     }

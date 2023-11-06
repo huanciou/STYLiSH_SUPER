@@ -13,6 +13,7 @@ router
 router
     .route("/products/details")
     .get(query("id").not().isEmpty().trim(), validator.handleResult, whoRU, getProduct);
+router.route("/products/recommendation").get(whoRU, recommendProduct);
 router
     .route("/products/:category")
     .get(param("category").isIn(["all", "men", "women", "accessories"]), query("paging").if(query("paging").exists()).isInt(), validator.handleResult, getProducts);
@@ -31,5 +32,4 @@ router.route("/product").post(uploadToBuffer.fields([
     { name: "main_image", maxCount: 1 },
     { name: "images", maxCount: 5 },
 ]), checkFileType, saveImagesToDisk, createProduct);
-router.route("/products/recommendation").get(whoRU, recommendProduct);
 export default router;

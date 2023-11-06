@@ -37,6 +37,8 @@ router
     getProduct
   );
 
+router.route("/products/recommendation").get(whoRU, recommendProduct);
+
 router
   .route("/products/:category")
   .get(
@@ -65,7 +67,5 @@ router.route("/product").post(
   saveImagesToDisk,
   createProduct
 );
-
-router.route("/products/recommendation").get(whoRU, recommendProduct);
 
 export default router;
