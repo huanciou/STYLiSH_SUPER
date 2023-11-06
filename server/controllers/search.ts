@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { searchProductsIdsFromElastic } from "../models/searchProduct.js";
+import { searchProductsIdsFromElastic } from "../models/elasticsearch.js";
 
 export async function searchProductsId(
   req: Request,

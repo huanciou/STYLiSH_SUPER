@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { fileTypeFromBuffer } from "file-type";
 import { product } from "../schema/schema.js";
 import { Redis } from "ioredis";
+import { uploadProductsToElasticSearch } from "../models/elasticsearch.js";
 export const redis = new Redis({
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
@@ -51,8 +52,7 @@ export async function getProduct(req, res) {
         const queueKey = `${userId}BrowsingHistory`;
         const sortedSetKey = `${userId}BrowsingHistoryCounter`;
         const maxQueueSize = 10;
-        // const tags = productData?.tags
-        const tags = ["隨性", "89"];
+        const tags = productData?.tags;
         tags?.forEach(async (tag) => {
             await redis.lpush(queueKey, tag);
             await redis.zincrby(sortedSetKey, 1, tag);
@@ -76,17 +76,15 @@ export async function getProduct(req, res) {
 }
 export async function searchProducts(req, res) {
     try {
+        const { productIds } = req.body.productIds;
         const paging = Number(req.query.paging) || 0;
-        const keyword = typeof req.query.keyword === "string" ? req.query.keyword : "";
-        const PAGE_COUNT = 7;
-        const PAGE_SKIP = 6;
-        const productsData = await product
-            .find({
-            title: { $regex: keyword, $options: "i" },
-        })
-            .sort({ id: 1 })
-            .skip(paging * PAGE_SKIP)
-            .limit(PAGE_COUNT);
+        // const keyword =
+        //   typeof req.query.keyword === "string" ? req.query.keyword : "";
+        // const PAGE_COUNT = 7;
+        // const PAGE_SKIP = 6;
+        const productsData = await product.find({
+            _id: { $in: productIds },
+        });
         let next_paging = paging + 1;
         if (productsData.length > 6) {
             productsData.pop();
@@ -177,6 +175,8 @@ export async function createProduct(req, res) {
         });
         console.log(req.body);
         const productData = await product.create(req.body);
+        req.body.id = productData._id;
+        const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
         const productId = productData._id.toString();
         res.status(200).json(productId);
     }

@@ -91,19 +91,16 @@ export async function getProduct(req: Request, res: Response) {
 
 export async function searchProducts(req: Request, res: Response) {
   try {
+    const { productIds } = req.body.productIds;
     const paging = Number(req.query.paging) || 0;
-    const keyword =
-      typeof req.query.keyword === "string" ? req.query.keyword : "";
-    const PAGE_COUNT = 7;
-    const PAGE_SKIP = 6;
+    // const keyword =
+    //   typeof req.query.keyword === "string" ? req.query.keyword : "";
+    // const PAGE_COUNT = 7;
+    // const PAGE_SKIP = 6;
 
-    const productsData = await product
-      .find({
-        title: { $regex: keyword, $options: "i" },
-      })
-      .sort({ id: 1 })
-      .skip(paging * PAGE_SKIP)
-      .limit(PAGE_COUNT);
+    const productsData = await product.find({
+      _id: { $in: productIds },
+    });
 
     let next_paging: number | null = paging + 1;
     if (productsData.length > 6) {
@@ -228,7 +225,8 @@ export async function createProduct(req: Request, res: Response) {
     });
     console.log(req.body);
     const productData = await product.create(req.body);
-
+    req.body.id = productData._id;
+    const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
     const productId = productData._id.toString();
 
     res.status(200).json(productId);
@@ -270,7 +268,10 @@ export async function recommendProduct(req: Request, res: Response) {
     }
 
     if (tag) {
-      const productsData = await product.find({ tags: { $in: tag } })
+      const productsData = await product
+        .find({ tags: { $in: tag } })
+        .skip(0)
+        .limit(10);
 
       return res.status(200).json({ data: [productsData] });
     }

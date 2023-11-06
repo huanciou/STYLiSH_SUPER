@@ -25,7 +25,8 @@ router
     query("paging").if(query("paging").exists()).isInt(),
     query("category").if(query("category").exists()).isString(),
     validator.handleResult,
-    searchProductsId
+    searchProductsId,
+    searchProducts
   );
 
 router
