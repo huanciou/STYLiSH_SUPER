@@ -17,7 +17,7 @@ const client = new Client({
 });
 
 export async function uploadProductsToElasticSearch(productData: {
-  _id: string;
+  id: string;
   category: string;
   tags: string;
   title: string;
@@ -30,13 +30,19 @@ export async function uploadProductsToElasticSearch(productData: {
   time: number;
 }) {
   try {
-    const { _id, category, tags, title, price, colors, sizes, time } =
+    const { id, category, tags, title, price, colors, sizes, time } =
       productData;
+
+    console.log("=============");
+    console.log("time is:" + time);
+
+    console.log("=============");
+    console.log(typeof price);
 
     const createResult = await client.index({
       index: "products",
       body: {
-        _id,
+        id,
         category,
         tags,
         click: 0,
@@ -47,8 +53,6 @@ export async function uploadProductsToElasticSearch(productData: {
         time,
       },
     });
-
-    console.log(createResult);
   } catch (err) {
     console.log(err);
     console.log("something is wrong creating product to elasticsearch");
@@ -97,30 +101,38 @@ export async function searchProductsIdsFromElastic(
     });
   }
 
-  let sorts = [];
+  let sorts: any;
 
   if (sorting === "newest") {
-    sorts.push({
-      time: "desc",
-    });
+    console.log("newest~~~~~~~~~~~~~~~~~~~~~~~");
+    //sorts = "time:desc";
+    sorts = {
+      time: {
+        order: "desc",
+      },
+    };
   } else if (sorting === "price_asc") {
-    sorts.push({
-      price: "asc",
-    });
+    //sorts = "price:asc";
+    sorts = {
+      price: { order: "asc" },
+    };
   } else if (sorting === "price_desc") {
-    sorts.push({
-      price: "desc",
-    });
+    //sorts = "price:desc";
+    sorts = {
+      price: { order: "desc" },
+    };
   } else {
-    sorts.push({
-      click: "desc",
-    });
+    //sorts = "click:desc";
+    sorts = {
+      click: { order: "desc" },
+    };
   }
 
   const result: any = await client.search({
     index: "products",
+
     _source: [
-      "_id",
+      "id",
       "category",
       "tags",
       "click",
@@ -129,9 +141,14 @@ export async function searchProductsIdsFromElastic(
       "colors",
       "sizes",
     ],
+    sort: [
+      {
+        time: "asc",
+      },
+    ],
     size: PRODUCTS_PER_PAGE + 1,
     from: PRODUCTS_PER_PAGE * paging,
-    sort: [{ click: "asc" }],
+
     query: {
       bool: {
         must: must,
@@ -144,7 +161,13 @@ export async function searchProductsIdsFromElastic(
 
   console.log(JSON.stringify(result, null, 4));
 
-  return result.hits.hits.map((product: any) => product["_source"]["_id"]);
+  return result.hits.hits.map((product: any) => {
+    console.log("~~~~~~~~~~~~~~~~~~~~~");
+    console.log(product["_source"]["id"]);
+    console.log("~~~~~~~~~~~~~~~~~~~~~");
+
+    return product["_source"]["id"];
+  });
 }
 
 export async function addClickToElasticSearch(productId: string) {

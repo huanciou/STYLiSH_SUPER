@@ -76,8 +76,12 @@ export async function getProduct(req, res) {
 }
 export async function searchProducts(req, res) {
     try {
-        const { productIds } = req.body.productIds;
+        const { productIds } = req.body;
         const paging = Number(req.query.paging) || 0;
+        console.log("===============");
+        console.log("searching product");
+        console.log(productIds);
+        console.log("===============");
         // const keyword =
         //   typeof req.query.keyword === "string" ? req.query.keyword : "";
         // const PAGE_COUNT = 7;
@@ -166,7 +170,14 @@ export async function createProduct(req, res) {
         }
         req.body.main_image = res.locals.images[0].filename;
         req.body.images = updatedImages;
-        const CATE_TAGS = req.body.tags;
+        const TAGS = req.body.tags;
+        let CATE_TAGS = [];
+        if (typeof TAGS == "string") {
+            CATE_TAGS.push(TAGS);
+        }
+        else {
+            CATE_TAGS = TAGS;
+        }
         console.log(CATE_TAGS);
         const CATE = req.body.category;
         console.log(CATE);
@@ -175,7 +186,16 @@ export async function createProduct(req, res) {
         });
         console.log(req.body);
         const productData = await product.create(req.body);
+        console.log("=================");
+        console.log("productData = " + JSON.stringify(productData, null, 4));
         req.body.id = productData._id;
+        req.body.time = productData.time;
+        req.body.price = productData.price;
+        req.body.colors = productData.colorName;
+        req.body.sizes = productData.size;
+        console.log("=================");
+        console.log("product mongo id = " + req.body.id);
+        console.log("=================");
         const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
         const productId = productData._id.toString();
         res.status(200).json(productId);
@@ -209,7 +229,10 @@ export async function recommendProduct(req, res) {
             tag = null;
         }
         if (tag) {
-            const productsData = await product.find({ tags: { $in: tag } });
+            const productsData = await product
+                .find({ tags: { $in: tag } })
+                .skip(0)
+                .limit(10);
             return res.status(200).json({ data: [productsData] });
         }
         res.status(200).json({ data: [hotProducts] });

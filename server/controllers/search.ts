@@ -30,7 +30,15 @@ export async function searchProductsId(
 
   // If there're 7 ids, meaning there's next page
   // The ids are sorted already
+  console.log("#####################");
+  console.log("productsIds = " + productsIds);
+  console.log("#####################");
+
   req.body.productIds = productsIds;
+
+  console.log("#####################");
+  console.log("req.body.productIds = " + req.body.productIds);
+  console.log("#####################");
 
   next();
 }

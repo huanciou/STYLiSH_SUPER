@@ -91,8 +91,14 @@ export async function getProduct(req: Request, res: Response) {
 
 export async function searchProducts(req: Request, res: Response) {
   try {
-    const { productIds } = req.body.productIds;
+    const { productIds } = req.body;
     const paging = Number(req.query.paging) || 0;
+    console.log("===============");
+    console.log("searching product");
+    console.log(productIds);
+
+    console.log("===============");
+
     // const keyword =
     //   typeof req.query.keyword === "string" ? req.query.keyword : "";
     // const PAGE_COUNT = 7;
@@ -213,7 +219,13 @@ export async function createProduct(req: Request, res: Response) {
     req.body.main_image = res.locals.images[0].filename;
     req.body.images = updatedImages;
 
-    const CATE_TAGS: any = req.body.tags;
+    const TAGS: any = req.body.tags;
+    let CATE_TAGS = [];
+    if (typeof TAGS == "string") {
+      CATE_TAGS.push(TAGS);
+    } else {
+      CATE_TAGS = TAGS;
+    }
 
     console.log(CATE_TAGS);
 
@@ -225,7 +237,19 @@ export async function createProduct(req: Request, res: Response) {
     });
     console.log(req.body);
     const productData = await product.create(req.body);
+    console.log("=================");
+    console.log("productData = " + JSON.stringify(productData, null, 4));
+
     req.body.id = productData._id;
+    req.body.time = productData.time;
+    req.body.price = productData.price;
+    req.body.colors = productData.colorName;
+    req.body.sizes = productData.size;
+    console.log("=================");
+    console.log("product mongo id = " + req.body.id);
+
+    console.log("=================");
+
     const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
     const productId = productData._id.toString();
 
