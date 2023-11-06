@@ -11,3 +11,5 @@ uploads/*
 
 /logs/console/console.log
 /logs/morganBody/morganBody.log
+
+/test

@@ -7,14 +7,13 @@ import orderRouter from "./routes/order.js";
 import reportRouter from "./routes/report.js";
 import branch from "./middleware/branch.js";
 import authenticate from "./middleware/authenticate.js";
-import authorization from "./middleware/authorization.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import { errorHandler } from "./utils/errorHandler.js";
 import morganBody from 'morgan-body';
 import fs from 'fs';
 import './models/mongo.js';
 const app = express();
-const port = 3000;
+const port = 5000;
 app.use(cookieParser());
 app.enable('trust proxy');
 const router = Router();
@@ -35,7 +34,7 @@ app.use("/api", rateLimiter, [
     orderRouter,
     reportRouter,
 ]);
-app.use(branch((req) => req.path.includes("/admin"), [authenticate, authorization("admin")]), express.static("../client"));
+app.use(branch((req) => req.path.includes("/admin"), [authenticate]), express.static("../client"));
 app.use("/uploads", express.static("./uploads"));
 app.use("/assets", express.static("./assets"));
 app.use(errorHandler);

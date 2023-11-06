@@ -7,9 +7,11 @@ import {
   createProduct,
   checkFileType,
   saveImagesToDisk,
+  recommendProduct,
 } from "../controllers/product.js";
 import { uploadToBuffer } from "../middleware/multer.js";
 import * as validator from "../middleware/validator.js";
+import whoRU from "../middleware/whoRU.js";
 
 const router = Router();
 
@@ -26,7 +28,7 @@ router
 
 router
   .route("/products/details")
-  .get(query("id").not().isEmpty().trim(), validator.handleResult, getProduct);
+  .get(query("id").not().isEmpty().trim(), validator.handleResult, whoRU, getProduct);
 
 router
   .route("/products/:category")
@@ -46,5 +48,7 @@ router.route("/product").post(
   saveImagesToDisk,
   createProduct
 );
+
+router.route("/products/recommendation").get(whoRU, recommendProduct);
 
 export default router;

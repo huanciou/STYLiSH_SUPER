@@ -4,73 +4,37 @@ import { fileURLToPath } from "url";
 import { nanoid } from "nanoid";
 import { NextFunction, Request, Response } from "express";
 import { fileTypeFromBuffer } from "file-type";
+import { product } from "../schema/schema.js"
+import { Redis } from "ioredis";
 
-import * as productModel from "../models/product.js";
-import * as productImageModel from "../models/productImage.js";
-import * as productVariantModel from "../models/productVariant.js";
-
-function mapId<Item extends { id: number }>(item: Item) {
-  return item.id;
-}
-
-function mapImages(imagesObj: {
-  [productId: string]: { main_image: string; images: string[] };
-}) {
-  return <Product extends { id: number }>(product: Product) => ({
-    ...product,
-    main_image: `${imagesObj[product.id]?.main_image}` ?? "",
-    images: imagesObj[product.id]?.images?.map?.((image) => `${image}`) ?? [],
-  });
-}
-
-function mapVariants(variantsObj: {
-  [productId: string]: {
-    variants: {
-      color_code: string;
-      size: string;
-      stock: number;
-    }[];
-    sizes: Set<string>;
-    colorsMap: { [colorCode: string]: string };
-  };
-}) {
-  return <Product extends { id: number }>(product: Product) => ({
-    ...product,
-    ...variantsObj[product.id],
-    sizes: Array.from(variantsObj[product.id].sizes),
-    colors: Object.entries(variantsObj[product.id].colorsMap).map(
-      ([key, value]) => ({
-        code: key,
-        name: value,
-      })
-    ),
-  });
-}
+export const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  password: process.env.REDIS_PASSWORD,
+  // commandTimeout: 300,
+});
 
 export async function getProducts(req: Request, res: Response) {
   try {
     const paging = Number(req.query.paging) || 0;
     const category = req.params.category;
-    const [productsData, productsCount] = await Promise.all([
-      productModel.getProducts({ paging, category }),
-      productModel.countProducts({ category }),
-    ]);
-    const productIds = productsData?.map?.(mapId);
-    const [images, variants] = await Promise.all([
-      productImageModel.getProductImages(productIds),
-      productVariantModel.getProductVariants(productIds),
-    ]);
-    const imagesObj = productImageModel.groupImages(images);
-    const variantsObj = productVariantModel.groupVariants(variants);
-    const products = productsData
-      .map(mapImages(imagesObj))
-      .map(mapVariants(variantsObj));
-    res.json({
-      data: products,
-      ...(productModel.PAGE_COUNT * (paging + 1) < productsCount
-        ? { next_paging: paging + 1 }
-        : {}),
-    });
+    const PAGE_COUNT = 7;
+    const PAGE_SKIP = 6;
+
+    if (category === 'all') {
+      const productsData = await product.find().skip(paging * PAGE_COUNT).limit(PAGE_COUNT);
+      return res.json({ data: [productsData] });
+    }
+
+    const productsData = await product.find({ category }).skip(paging * PAGE_SKIP).limit(PAGE_COUNT);
+
+    let next_paging: number | null = paging + 1;
+    if (productsData.length > 6) {
+      productsData.pop();
+    } else {
+      next_paging = null;
+    }
+
+    res.status(200).json({ data: [productsData], next_paging });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ data: [] });
@@ -79,21 +43,35 @@ export async function getProducts(req: Request, res: Response) {
 
 export async function getProduct(req: Request, res: Response) {
   try {
-    const id = Number(req.query.id);
-    const productsData = await productModel.getProduct(id);
-    const productIds = productsData?.map?.(mapId);
-    const [images, variants] = await Promise.all([
-      productImageModel.getProductImages(productIds),
-      productVariantModel.getProductVariants(productIds),
-    ]);
-    const imagesObj = productImageModel.groupImages(images);
-    const variantsObj = productVariantModel.groupVariants(variants);
-    const products = productsData
-      .map(mapImages(imagesObj))
-      .map(mapVariants(variantsObj));
-    res.json({
-      data: products[0],
-    });
+    const id = String(req.query.id);
+
+    // Update click
+    const productData = await product.findOneAndUpdate(
+      { _id: id },
+      { $inc: { click: 1 } },
+      { new: true }
+    );
+
+    // Update history
+    const userId = res.locals.userId
+    const queueKey = `${userId}BrowsingHistory`
+    const sortedSetKey = `${userId}BrowsingHistoryCounter`
+    const maxQueueSize = 10
+    const tags = productData?.tags
+
+    tags?.forEach(async (tag: string) => {
+      await redis.lpush(queueKey, tag);
+      await redis.zincrby(sortedSetKey, 1, tag);
+
+      // Check queue length
+      const queueLength = await redis.llen(queueKey);
+      if (queueLength > maxQueueSize) {
+        const removedtag = await redis.rpop(queueKey) as string;
+        await redis.zincrby(sortedSetKey, -1, removedtag);
+      }
+    })
+
+    res.json({ data: [productData] });
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -109,26 +87,24 @@ export async function searchProducts(req: Request, res: Response) {
     const paging = Number(req.query.paging) || 0;
     const keyword =
       typeof req.query.keyword === "string" ? req.query.keyword : "";
-    const [productsData, productsCount] = await Promise.all([
-      productModel.searchProducts({ paging, keyword }),
-      productModel.countProducts({ keyword }),
-    ]);
-    const productIds = productsData?.map?.(mapId);
-    const [images, variants] = await Promise.all([
-      productImageModel.getProductImages(productIds),
-      productVariantModel.getProductVariants(productIds),
-    ]);
-    const imagesObj = productImageModel.groupImages(images);
-    const variantsObj = productVariantModel.groupVariants(variants);
-    const products = productsData
-      .map(mapImages(imagesObj))
-      .map(mapVariants(variantsObj));
-    res.json({
-      data: products,
-      ...(productModel.PAGE_COUNT * (paging + 1) < productsCount
-        ? { next_paging: paging + 1 }
-        : {}),
-    });
+    const PAGE_COUNT = 7;
+    const PAGE_SKIP = 6;
+
+    const productsData = await product.find({
+      title: { $regex: keyword, $options: "i" }
+    })
+      .sort({ id: 1 })
+      .skip(paging * PAGE_SKIP)
+      .limit(PAGE_COUNT);
+
+    let next_paging: number | null = paging + 1;
+    if (productsData.length > 6) {
+      productsData.pop();
+    } else {
+      next_paging = null;
+    }
+
+    res.json({ data: [productsData], next_paging });
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -224,42 +200,30 @@ export async function saveImagesToDisk(
 
 export async function createProduct(req: Request, res: Response) {
   try {
-    const productId = await productModel.createProduct(req.body);
-    if (typeof productId !== "number") {
-      throw new Error("create product failed");
+    const updatedImages = [];
+    for (let i = 0; i < res.locals.images.length; i++) {
+      updatedImages.push(res.locals.images[i].filename);
     }
-    if (Array.isArray(res.locals.images) && res.locals.images.length > 0) {
-      const productImageData = res.locals.images.map((image) => {
-        return {
-          productId,
-          ...image,
-        };
-      });
-      productImageModel.createProductImages(productImageData);
-    }
-    if (typeof req.body.color === "string" && req.body.color.length > 0) {
-      await productVariantModel.createProductVariants([
-        {
-          productId,
-          color: req.body.color,
-          colorName: req.body.colorName,
-          size: req.body.size,
-          stock: req.body.stock,
-        },
-      ]);
-    }
-    if (Array.isArray(req.body.color) && req.body.color.length > 0) {
-      const variants = req.body.color.map((color: string, index: number) => {
-        return {
-          productId,
-          color,
-          colorName: req.body.colorName[index],
-          size: req.body.size[index],
-          stock: req.body.stock[index],
-        };
-      });
-      await productVariantModel.createProductVariants(variants);
-    }
+
+    req.body.main_image = res.locals.images[0].filename;
+    req.body.images = updatedImages;
+
+
+    const CATE_TAGS: any = req.body.tags;
+
+    console.log(CATE_TAGS);
+
+    const CATE = req.body.category;
+    console.log(CATE);
+
+    req.body.tags = CATE_TAGS.map((tag: String) => {
+      return `${CATE}_${tag}`;
+    })
+    console.log(req.body);
+    const productData = await product.create(req.body);
+
+    const productId = productData._id.toString();
+
     res.status(200).json(productId);
   } catch (err) {
     if (err instanceof Error) {
@@ -267,5 +231,41 @@ export async function createProduct(req: Request, res: Response) {
       return;
     }
     res.status(500).json({ errors: "create product failed" });
+  }
+}
+
+export async function recommendProduct(req: Request, res: Response) {
+  try {
+    const userId = res.locals.userId
+    const hotProductIds: string[] = []
+    let hotProducts
+    // Hot recommendation
+    if (!userId) {
+      hotProducts = await product.find({ _id: { $in: hotProductIds } })
+
+      return res.status(200).json({ data: [hotProducts] })
+    }
+
+    // Personal recommendation
+    const sortedSetKey = `${userId}BrowsingHistoryCounter`
+    let tag;
+    const mostFrequentTag = await redis.zrevrange(sortedSetKey, 0, 0, "WITHSCORES");
+
+    if (mostFrequentTag.length > 0) {
+      tag = mostFrequentTag[0];
+    } else {
+      tag = null;
+    }
+
+    if (!tag) {
+      const productsData = await product.find({ tags: { $in: tag } })
+
+      return res.status(200).json({ data: [productsData] })
+    }
+
+    res.status(200).json({ data: [hotProducts] })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ errors: "save images failed" });
   }
 }

@@ -36,7 +36,7 @@ const recipientSchema = new mongoose.Schema({
 });
 const listSchema = new mongoose.Schema({
     id: {
-        type: Number,
+        type: String,
         required: true,
     },
     name: {
@@ -62,7 +62,7 @@ const listSchema = new mongoose.Schema({
 /* export Schemas */
 
 
-export const productSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
@@ -109,34 +109,41 @@ export const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    colors: [colorSchema],
-    sizes: {
+    size: {
         type: [String],
-        required: false,
+        required: true,
     },
-    variants: [
-        {
-            color_code: {
-                type: String,
-                required: true,
-            },
-            size: {
-                type: String,
-                required: true,
-            },
-            stock: {
-                type: Number,
-                required: true,
-            },
-        },
-    ],
+    stock: {
+        type: [Number],
+        required: true,
+        min: 0,
+    },
+    color: {
+        type: [String],
+        required: true,
+    },
+    colorName: {
+        type: [String],
+        required: true,
+    },
     main_image: {
         type: String,
         required: true,
     },
     images: [String],
+    time: {
+        type: Number,
+    }
 });
-export const UserSchema = new mongoose.Schema({
+
+productSchema.pre('save', function (next) {
+    if (!this.time && this._id) {
+        this.time = this._id.getTimestamp().getTime();
+    }
+    next();
+})
+
+const UserSchema = new mongoose.Schema({
     provider: {
         type: String,
         required: true,
@@ -163,7 +170,7 @@ export const UserSchema = new mongoose.Schema({
         required: false,
     },
 });
-export const OrderSchema = new mongoose.Schema({
+const OrderSchema = new mongoose.Schema({
     order: {
         shipping: {
             type: String,
@@ -189,7 +196,7 @@ export const OrderSchema = new mongoose.Schema({
         list: [listSchema],
     },
 });
-export const CampaignSchema = new mongoose.Schema({
+const CampaignSchema = new mongoose.Schema({
     product_id: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: "product",
@@ -204,10 +211,8 @@ export const CampaignSchema = new mongoose.Schema({
 
 
 // Create Models
-const product = mongoose.model("Product", productSchema);
-const campaign = mongoose.model("Campaign", CampaignSchema);
-const order = mongoose.model("Order", OrderSchema);
-const user = mongoose.model("User", UserSchema);
+export const product = mongoose.model("Product", productSchema);
+export const campaign = mongoose.model("Campaign", CampaignSchema);
+export const orderModel = mongoose.model("Order", OrderSchema);
+export const user = mongoose.model("User", UserSchema);
 
-
-module.exports = { product, campaign, order, user };
