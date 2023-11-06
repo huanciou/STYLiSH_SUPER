@@ -9,6 +9,7 @@ import {
   saveImagesToDisk,
   recommendProduct,
 } from "../controllers/product.js";
+import { searchProductsId } from "../controllers/search.js";
 import { uploadToBuffer } from "../middleware/multer.js";
 import * as validator from "../middleware/validator.js";
 import whoRU from "../middleware/whoRU.js";
@@ -22,13 +23,19 @@ router
   .get(
     query("keyword").not().isEmpty().trim(),
     query("paging").if(query("paging").exists()).isInt(),
+    query("category").if(query("category").exists()).isString(),
     validator.handleResult,
-    searchProducts
+    searchProductsId
   );
 
 router
   .route("/products/details")
-  .get(query("id").not().isEmpty().trim(), validator.handleResult, whoRU, getProduct);
+  .get(
+    query("id").not().isEmpty().trim(),
+    validator.handleResult,
+    whoRU,
+    getProduct
+  );
 
 router
   .route("/products/:category")
@@ -38,7 +45,17 @@ router
     validator.handleResult,
     getProducts
   );
-
+////
+// router.route("/pd").post(
+//   (req: Request, res: Response, next: NextFunction) => {
+//     uploadProductsToElasticSearch(req.body);
+//     next();
+//   },
+//   (req: Request, res: Response) => {
+//     res.send("upload");
+//   }
+// );
+////
 router.route("/product").post(
   uploadToBuffer.fields([
     { name: "main_image", maxCount: 1 },

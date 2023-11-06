@@ -10,16 +10,16 @@ import authenticate from "./middleware/authenticate.js";
 import authorization from "./middleware/authorization.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import { errorHandler } from "./utils/errorHandler.js";
-import morganBody from 'morgan-body';
-import fs from 'fs';
-import './models/mongo.js';
+import morganBody from "morgan-body";
+import fs from "fs";
+import "./models/mongo.js";
 
 const app = express();
-const port = 5000;
+const port = 3000;
 
 app.use(cookieParser());
 
-app.enable('trust proxy');
+app.enable("trust proxy");
 
 const router = Router();
 
@@ -30,11 +30,13 @@ router.use(function (req, res, next) {
 app.use(express.json());
 
 // log
-const log = fs.createWriteStream('./logs/morganBody/morganBody.log', { flags: "a" })
+const log = fs.createWriteStream("./logs/morganBody/morganBody.log", {
+  flags: "a",
+});
 morganBody(app, {
   noColors: true,
   stream: log,
-})
+});
 
 app.use("/api", rateLimiter, [
   productRouter,
@@ -45,10 +47,7 @@ app.use("/api", rateLimiter, [
 ]);
 
 app.use(
-  branch(
-    (req) => req.path.includes("/admin"),
-    [authenticate]
-  ),
+  branch((req) => req.path.includes("/admin"), [authenticate]),
   express.static("../client")
 );
 
@@ -61,21 +60,22 @@ app.listen(port, () => {
   console.log(`STYLiSH listening on port ${port}`);
 });
 
-const outputLogStream = fs.createWriteStream('./logs/console/console.log', { flags: 'a' })
+const outputLogStream = fs.createWriteStream("./logs/console/console.log", {
+  flags: "a",
+});
 
-if (process.env.SERVER_STATUS === 'production') {
-
+if (process.env.SERVER_STATUS === "production") {
   const originalConsoleLog = console.log;
   console.log = (...args) => {
-    const message = args.join(' ')
-    outputLogStream.write(message + '\n');
-    originalConsoleLog(...args)
-  }
+    const message = args.join(" ");
+    outputLogStream.write(message + "\n");
+    originalConsoleLog(...args);
+  };
 
-  const originalConsoleError = console.error
+  const originalConsoleError = console.error;
   console.error = (...args) => {
-    const message = args.join(' ')
-    outputLogStream.write(`[ERROR] ${message}\n`)
+    const message = args.join(" ");
+    outputLogStream.write(`[ERROR] ${message}\n`);
 
     for (const arg of args) {
       if (arg instanceof Error) {
@@ -83,6 +83,6 @@ if (process.env.SERVER_STATUS === 'production') {
       }
     }
 
-    originalConsoleError(...args)
-  }
+    originalConsoleError(...args);
+  };
 }

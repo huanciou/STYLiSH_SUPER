@@ -16,11 +16,17 @@ export async function getProducts(req, res) {
         const category = req.params.category;
         const PAGE_COUNT = 7;
         const PAGE_SKIP = 6;
-        if (category === 'all') {
-            const productsData = await product.find().skip(paging * PAGE_COUNT).limit(PAGE_COUNT);
+        if (category === "all") {
+            const productsData = await product
+                .find()
+                .skip(paging * PAGE_COUNT)
+                .limit(PAGE_COUNT);
             return res.json({ data: [productsData] });
         }
-        const productsData = await product.find({ category }).skip(paging * PAGE_SKIP).limit(PAGE_COUNT);
+        const productsData = await product
+            .find({ category })
+            .skip(paging * PAGE_SKIP)
+            .limit(PAGE_COUNT);
         let next_paging = paging + 1;
         if (productsData.length > 6) {
             productsData.pop();
@@ -52,7 +58,7 @@ export async function getProduct(req, res) {
             // Check queue length
             const queueLength = await redis.llen(queueKey);
             if (queueLength > maxQueueSize) {
-                const removedtag = await redis.rpop(queueKey);
+                const removedtag = (await redis.rpop(queueKey));
                 await redis.zincrby(sortedSetKey, -1, removedtag);
             }
         });
@@ -73,8 +79,9 @@ export async function searchProducts(req, res) {
         const keyword = typeof req.query.keyword === "string" ? req.query.keyword : "";
         const PAGE_COUNT = 7;
         const PAGE_SKIP = 6;
-        const productsData = await product.find({
-            title: { $regex: keyword, $options: "i" }
+        const productsData = await product
+            .find({
+            title: { $regex: keyword, $options: "i" },
         })
             .sort({ id: 1 })
             .skip(paging * PAGE_SKIP)

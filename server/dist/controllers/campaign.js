@@ -3,6 +3,7 @@ import * as cache from "../utils/cache.js";
 import * as campaignModel from "../models/campaign.js";
 import { product, campaign } from "../schema/schema.js";
 const CACHE_KEY = cache.getCampaignKey();
+//
 export async function getCampaigns(req, res) {
     try {
         // Check cache first

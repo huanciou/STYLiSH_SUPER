@@ -7,6 +7,7 @@ import { product, campaign } from "../schema/schema.js"
 
 const CACHE_KEY = cache.getCampaignKey();
 
+//
 export async function getCampaigns(req: Request, res: Response) {
   try {
     // Check cache first

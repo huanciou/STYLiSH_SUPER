@@ -4,8 +4,9 @@ import { fileURLToPath } from "url";
 import { nanoid } from "nanoid";
 import { NextFunction, Request, Response } from "express";
 import { fileTypeFromBuffer } from "file-type";
-import { product } from "../schema/schema.js"
+import { product } from "../schema/schema.js";
 import { Redis } from "ioredis";
+import { uploadProductsToElasticSearch } from "../models/elasticsearch.js";
 
 export const redis = new Redis({
   host: process.env.REDIS_HOST,
@@ -20,12 +21,18 @@ export async function getProducts(req: Request, res: Response) {
     const PAGE_COUNT = 7;
     const PAGE_SKIP = 6;
 
-    if (category === 'all') {
-      const productsData = await product.find().skip(paging * PAGE_COUNT).limit(PAGE_COUNT);
+    if (category === "all") {
+      const productsData = await product
+        .find()
+        .skip(paging * PAGE_COUNT)
+        .limit(PAGE_COUNT);
       return res.json({ data: [productsData] });
     }
 
-    const productsData = await product.find({ category }).skip(paging * PAGE_SKIP).limit(PAGE_COUNT);
+    const productsData = await product
+      .find({ category })
+      .skip(paging * PAGE_SKIP)
+      .limit(PAGE_COUNT);
 
     let next_paging: number | null = paging + 1;
     if (productsData.length > 6) {
@@ -53,11 +60,11 @@ export async function getProduct(req: Request, res: Response) {
     );
 
     // Update history
-    const userId = res.locals.userId
-    const queueKey = `${userId}BrowsingHistory`
-    const sortedSetKey = `${userId}BrowsingHistoryCounter`
-    const maxQueueSize = 10
-    const tags = productData?.tags
+    const userId = res.locals.userId;
+    const queueKey = `${userId}BrowsingHistory`;
+    const sortedSetKey = `${userId}BrowsingHistoryCounter`;
+    const maxQueueSize = 10;
+    const tags = productData?.tags;
 
     tags?.forEach(async (tag: string) => {
       await redis.lpush(queueKey, tag);
@@ -66,10 +73,10 @@ export async function getProduct(req: Request, res: Response) {
       // Check queue length
       const queueLength = await redis.llen(queueKey);
       if (queueLength > maxQueueSize) {
-        const removedtag = await redis.rpop(queueKey) as string;
+        const removedtag = (await redis.rpop(queueKey)) as string;
         await redis.zincrby(sortedSetKey, -1, removedtag);
       }
-    })
+    });
 
     res.json({ data: [productData] });
   } catch (err) {
@@ -90,9 +97,10 @@ export async function searchProducts(req: Request, res: Response) {
     const PAGE_COUNT = 7;
     const PAGE_SKIP = 6;
 
-    const productsData = await product.find({
-      title: { $regex: keyword, $options: "i" }
-    })
+    const productsData = await product
+      .find({
+        title: { $regex: keyword, $options: "i" },
+      })
       .sort({ id: 1 })
       .skip(paging * PAGE_SKIP)
       .limit(PAGE_COUNT);
@@ -208,7 +216,6 @@ export async function createProduct(req: Request, res: Response) {
     req.body.main_image = res.locals.images[0].filename;
     req.body.images = updatedImages;
 
-
     const CATE_TAGS: any = req.body.tags;
 
     console.log(CATE_TAGS);
@@ -218,7 +225,7 @@ export async function createProduct(req: Request, res: Response) {
 
     req.body.tags = CATE_TAGS.map((tag: String) => {
       return `${CATE}_${tag}`;
-    })
+    });
     console.log(req.body);
     const productData = await product.create(req.body);
 
@@ -236,20 +243,25 @@ export async function createProduct(req: Request, res: Response) {
 
 export async function recommendProduct(req: Request, res: Response) {
   try {
-    const userId = res.locals.userId
-    const hotProductIds: string[] = []
-    let hotProducts
+    const userId = res.locals.userId;
+    const hotProductIds: string[] = [];
+    let hotProducts;
     // Hot recommendation
     if (!userId) {
-      hotProducts = await product.find({ _id: { $in: hotProductIds } })
+      hotProducts = await product.find({ _id: { $in: hotProductIds } });
 
-      return res.status(200).json({ data: [hotProducts] })
+      return res.status(200).json({ data: [hotProducts] });
     }
 
     // Personal recommendation
-    const sortedSetKey = `${userId}BrowsingHistoryCounter`
+    const sortedSetKey = `${userId}BrowsingHistoryCounter`;
     let tag;
-    const mostFrequentTag = await redis.zrevrange(sortedSetKey, 0, 0, "WITHSCORES");
+    const mostFrequentTag = await redis.zrevrange(
+      sortedSetKey,
+      0,
+      0,
+      "WITHSCORES"
+    );
 
     if (mostFrequentTag.length > 0) {
       tag = mostFrequentTag[0];
@@ -258,14 +270,14 @@ export async function recommendProduct(req: Request, res: Response) {
     }
 
     if (!tag) {
-      const productsData = await product.find({ tags: { $in: tag } })
+      const productsData = await product.find({ tags: { $in: tag } });
 
-      return res.status(200).json({ data: [productsData] })
+      return res.status(200).json({ data: [productsData] });
     }
 
-    res.status(200).json({ data: [hotProducts] })
+    res.status(200).json({ data: [hotProducts] });
   } catch (err) {
-    console.error(err)
+    console.error(err);
     return res.status(500).json({ errors: "save images failed" });
   }
 }
