@@ -13,7 +13,7 @@ import morganBody from "morgan-body";
 import fs from "fs";
 import "./models/mongo.js";
 const app = express();
-const port = 5000;
+const port = 3000;
 app.use(cookieParser());
 app.enable("trust proxy");
 const router = Router();
