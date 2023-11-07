@@ -76,7 +76,7 @@ export async function searchProductsIdsFromElastic(
   if (color) {
     must.push({
       match: {
-        "colors.name": color,
+        colors: color,
       },
     });
   }
@@ -89,7 +89,7 @@ export async function searchProductsIdsFromElastic(
     });
   }
 
-  if (category) {
+  if (category && category !== "all") {
     must.push({
       match: {
         category: category,

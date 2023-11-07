@@ -14,8 +14,94 @@ export const redis = new Redis({
     // commandTimeout: 300,
 });
 const DOMAIN_NAME = process.env.DOMAIN_NAME;
+function resp(productsData, next_paging = -1) {
+    if (next_paging === -1) {
+        const resData = {
+            data: [productsData].map((i) => {
+                const colors = [];
+                i.color.forEach((color, index) => {
+                    colors.push({
+                        code: color,
+                        name: i.colorName[index],
+                    });
+                });
+                const sizes = i.size;
+                const variants = [];
+                i.color.forEach((color, index) => {
+                    variants.push({
+                        color_code: color,
+                        size: sizes[index],
+                        stock: i.stock[index],
+                    });
+                });
+                return {
+                    id: i._id,
+                    category: i.category,
+                    tags: i.tags,
+                    title: i.title,
+                    description: i.description,
+                    price: i.price,
+                    texture: i.texture,
+                    wash: i.wash,
+                    place: i.place,
+                    note: i.note,
+                    story: i.story,
+                    colors,
+                    sizes,
+                    variants,
+                    main_image: i.main_image,
+                    images: i.images,
+                };
+            }),
+        };
+        return resData;
+    }
+    else {
+        const resData = {
+            data: productsData.map((i) => {
+                const colors = [];
+                i.color.forEach((color, index) => {
+                    colors.push({
+                        code: color,
+                        name: i.colorName[index],
+                    });
+                });
+                const sizes = i.size;
+                const variants = [];
+                i.color.forEach((color, index) => {
+                    variants.push({
+                        color_code: color,
+                        size: sizes[index],
+                        stock: i.stock[index],
+                    });
+                });
+                return {
+                    id: i._id,
+                    category: i.category,
+                    tags: i.tags,
+                    title: i.title,
+                    description: i.description,
+                    price: i.price,
+                    texture: i.texture,
+                    wash: i.wash,
+                    place: i.place,
+                    note: i.note,
+                    story: i.story,
+                    colors,
+                    sizes,
+                    variants,
+                    main_image: i.main_image,
+                    images: i.images,
+                };
+            }),
+            next_paging,
+        };
+        return resData;
+    }
+}
 export async function getProducts(req, res) {
     try {
+        console.log("======================");
         const paging = Number(req.query.paging) || 0;
         const category = req.params.category;
         const PAGE_COUNT = 7;
@@ -23,9 +109,25 @@ export async function getProducts(req, res) {
         if (category === "all") {
             const productsData = await product
                 .find()
-                .skip(paging * PAGE_COUNT)
+                .skip(paging * PAGE_SKIP)
                 .limit(PAGE_COUNT);
-            return res.json({ data: [productsData] });
+            console.log(paging);
+            let next_paging = paging + 1;
+            if (productsData.length > 6) {
+                productsData.pop();
+            }
+            else {
+                next_paging = null;
+            }
+            console.log(JSON.stringify(productsData, null, 4));
+            productsData.forEach((pd, index) => {
+                pd.main_image = DOMAIN_NAME + pd.main_image;
+                pd.images.forEach((image, ind) => {
+                    pd.images[ind] = DOMAIN_NAME + pd.images[ind];
+                });
+            });
+            const resData = resp(productsData, next_paging);
+            return res.json(resData);
         }
         const productsData = await product
             .find({ category })
@@ -38,13 +140,15 @@ export async function getProducts(req, res) {
         else {
             next_paging = null;
         }
-        productsData.forEach((product) => {
-            product.main_image = DOMAIN_NAME + product.main_image;
-            product.images.forEach((image, index) => {
-                product.images[index] = DOMAIN_NAME + product.images[index];
+        console.log(JSON.stringify(productsData, null, 4));
+        productsData.forEach((pd, index) => {
+            pd.main_image = DOMAIN_NAME + pd.main_image;
+            pd.images.forEach((image, ind) => {
+                pd.images[ind] = DOMAIN_NAME + pd.images[ind];
             });
         });
-        res.status(200).json({ data: [productsData], next_paging });
+        const resData = resp(productsData, next_paging);
+        res.json(resData);
     }
     catch (err) {
         console.error(err);
@@ -78,7 +182,8 @@ export async function getProduct(req, res) {
                 productData.images[index] = DOMAIN_NAME + productData.images[index];
             });
         }
-        res.json({ data: [productData] });
+        const resData = resp(productData);
+        res.json(resData);
     }
     catch (err) {
         console.error(err);
@@ -123,7 +228,8 @@ export async function searchProducts(req, res) {
             next_paging = null;
         }
         console.log(JSON.stringify(sortedData, null, 4));
-        res.json({ data: [sortedData], next_paging });
+        const resData = resp(productsData, next_paging);
+        res.json(resData);
     }
     catch (err) {
         console.error(err);
