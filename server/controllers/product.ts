@@ -335,3 +335,5 @@ export async function recommendProduct(req: Request, res: Response) {
     return res.status(500).json({ errors: "save images failed" });
   }
 }
+
+// function changeDbProductStyleToAPI(product) {}
