@@ -4,19 +4,138 @@ import { fileURLToPath } from "url";
 import { nanoid } from "nanoid";
 import { NextFunction, Request, Response } from "express";
 import { fileTypeFromBuffer } from "file-type";
-import { product } from "../schema/schema.js";
-import { Redis } from "ioredis";
-import { uploadProductsToElasticSearch } from "../models/elasticsearch.js";
-// import dotenv from "dotenv";
-// dotenv.config();
+import { product, campaign, order, user } from "../schema/schema.js"
 
-export const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  password: process.env.REDIS_PASSWORD,
-  // commandTimeout: 300,
-});
+function mapId<Item extends { id: number }>(item: Item) {
+  return item.id;
+}
 
-const DOMAIN_NAME = process.env.DOMAIN_NAME;
+function mapImages(imagesObj: {
+  [productId: string]: { main_image: string; images: string[] };
+}) {
+  return <Product extends { id: number }>(product: Product) => ({
+    ...product,
+    main_image: `${imagesObj[product.id]?.main_image}` ?? "",
+    images: imagesObj[product.id]?.images?.map?.((image) => `${image}`) ?? [],
+  });
+}
+
+function mapVariants(variantsObj: {
+  [productId: string]: {
+    variants: {
+      color_code: string;
+      size: string;
+      stock: number;
+    }[];
+    sizes: Set<string>;
+    colorsMap: { [colorCode: string]: string };
+  };
+}) {
+  return <Product extends { id: number }>(product: Product) => ({
+    ...product,
+    ...variantsObj[product.id],
+    sizes: Array.from(variantsObj[product.id].sizes),
+    colors: Object.entries(variantsObj[product.id].colorsMap).map(
+      ([key, value]) => ({
+        code: key,
+        name: value,
+      })
+    ),
+  });
+}
+
+function resp(productsData: any, next_paging: any = -1){
+  
+  if(next_paging === -1){
+    const resData = {
+      data: [productsData].map((i: any) => {
+        const colors: any = [];
+        i.color.forEach((color: any, index: number) => {
+          colors.push({
+            code: color,
+            name: i.colorName[index],
+          });
+        });
+    
+        const sizes = i.size;
+    
+        const variants: any = [];
+        i.color.forEach((color: any, index: number) => {
+          variants.push({
+            color_code: color,
+            size: sizes[index],
+            stock: i.stock[index],
+          });
+        });
+    
+        return {
+          id: i._id,
+          category: i.category,
+          tags: i.tags,
+          title: i.title,
+          description: i.description,
+          price: i.price,
+          texture: i.texture,
+          wash: i.wash,
+          place: i.place,
+          note: i.note,
+          story: i.story,
+          colors,
+          sizes,
+          variants,
+          main_image: i.main_image,
+          images: i.images,
+        };
+      }),
+    };
+    return resData;
+  } else {
+
+  const resData = {
+    data: productsData.map((i: any) => {
+      const colors: any = [];
+      i.color.forEach((color: any, index: number) => {
+        colors.push({
+          code: color,
+          name: i.colorName[index],
+        });
+      });
+  
+      const sizes = i.size;
+  
+      const variants: any = [];
+      i.color.forEach((color: any, index: number) => {
+        variants.push({
+          color_code: color,
+          size: sizes[index],
+          stock: i.stock[index],
+        });
+      });
+  
+      return {
+        id: i._id,
+        category: i.category,
+        tags: i.tags,
+        title: i.title,
+        description: i.description,
+        price: i.price,
+        texture: i.texture,
+        wash: i.wash,
+        place: i.place,
+        note: i.note,
+        story: i.story,
+        colors,
+        sizes,
+        variants,
+        main_image: i.main_image,
+        images: i.images,
+      };
+    }),
+    next_paging, 
+  };
+  return resData;
+}
+} 
 
 export async function getProducts(req: Request, res: Response) {
   try {
@@ -25,37 +144,32 @@ export async function getProducts(req: Request, res: Response) {
     const PAGE_COUNT = 7;
     const PAGE_SKIP = 6;
 
-    if (category === "all") {
-      const productsData = await product
-        .find()
-        .skip(paging * PAGE_COUNT)
-        .limit(PAGE_COUNT);
-      return res.json({ data: [productsData] });
-    }
-
-    const productsData = await product
-      .find({ category })
-      .skip(paging * PAGE_SKIP)
-      .limit(PAGE_COUNT);
-
+    if(category === 'all'){
+      const productsData = await product.find().skip(paging*PAGE_SKIP).limit(PAGE_COUNT);
+      console.log(paging, );
     let next_paging: number | null = paging + 1;
-    if (productsData.length > 6) {
+    if(productsData.length > 6){
       productsData.pop();
     } else {
       next_paging = null;
     }
+      const resData = resp(productsData, next_paging);
+      return res.json(resData);
+    }
 
-    productsData.forEach((product) => {
-      product.main_image = DOMAIN_NAME + product.main_image;
-      product.images.forEach((image, index) => {
-        product.images[index] = DOMAIN_NAME + product.images[index];
-      });
-    });
+    const productsData: any = await product.find({category}).skip(paging*PAGE_SKIP).limit(PAGE_COUNT);
 
-    res.status(200).json({ data: [productsData], next_paging });
+    let next_paging: number | null = paging + 1;
+    if(productsData.length > 6){
+      productsData.pop();
+    } else {
+      next_paging = null;
+    }
+    const resData = resp(productsData, next_paging);
+    res.json(resData);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ data: [] });
+    return res.status(500).json({ data: []});
   }
 }
 
@@ -63,40 +177,13 @@ export async function getProduct(req: Request, res: Response) {
   try {
     const id = String(req.query.id);
 
-    // Update click
     const productData = await product.findOneAndUpdate(
       { _id: id },
       { $inc: { click: 1 } },
       { new: true }
     );
-
-    // Update history
-    const userId = res.locals.userId;
-    const queueKey = `${userId}BrowsingHistory`;
-    const sortedSetKey = `${userId}BrowsingHistoryCounter`;
-    const maxQueueSize = 10;
-    const tags = productData?.tags;
-
-    tags?.forEach(async (tag: string) => {
-      await redis.lpush(queueKey, tag);
-      await redis.zincrby(sortedSetKey, 1, tag);
-
-      // Check queue length
-      const queueLength = await redis.llen(queueKey);
-      if (queueLength > maxQueueSize) {
-        const removedtag = (await redis.rpop(queueKey)) as string;
-        await redis.zincrby(sortedSetKey, -1, removedtag);
-      }
-    });
-
-    if (productData) {
-      productData.main_image = DOMAIN_NAME + productData.main_image;
-      productData.images.forEach((image, index) => {
-        productData.images[index] = DOMAIN_NAME + productData.images[index];
-      });
-    }
-
-    res.json({ data: [productData] });
+    const resData = resp(productData);
+    res.json(resData);
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -109,49 +196,27 @@ export async function getProduct(req: Request, res: Response) {
 
 export async function searchProducts(req: Request, res: Response) {
   try {
-    const { productIds } = req.body;
     const paging = Number(req.query.paging) || 0;
+    const keyword =
+      typeof req.query.keyword === "string" ? req.query.keyword : "";
+      const PAGE_COUNT = 7;
+      const PAGE_SKIP = 6;
 
-    const productsData = await product.find({
-      _id: { $in: productIds },
-    });
-
-    // console.log("=================");
-
-    // console.log(productIds);
-    // console.log(JSON.stringify(productsData, null, 4));
-    // console.log("=================");
-
-    const sortingMap = new Map();
-    productIds.forEach((id: string, index: number) => {
-      sortingMap.set(`"${id}"`, index);
-    });
-
-    const sortedData: Array<string> = [];
-
-    productsData.forEach((product) => {
-      product.main_image = DOMAIN_NAME + product.main_image;
-      product.images.forEach((image, index) => {
-        product.images[index] = DOMAIN_NAME + product.images[index];
-      });
-    });
-
-    productsData.forEach((data: any, index: number) => {
-      const dataIdString = JSON.stringify(data._id);
-
-      sortedData[sortingMap.get(dataIdString)] = data;
-    });
+    const productsData = await product.find({title:{$regex: keyword, $options: "i"}
+    })
+      .sort({id: 1})
+      .skip(paging*PAGE_SKIP)
+      .limit(PAGE_COUNT);
 
     let next_paging: number | null = paging + 1;
-
-    if (sortedData.length > 6) {
-      sortedData.pop();
+    if(productsData.length > 6){
+      productsData.pop();
     } else {
       next_paging = null;
     }
-    console.log(JSON.stringify(sortedData, null, 4));
 
-    res.json({ data: [sortedData], next_paging });
+    const resData = resp(productsData, next_paging);
+    res.json(resData);
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -247,41 +312,62 @@ export async function saveImagesToDisk(
 
 export async function createProduct(req: Request, res: Response) {
   try {
-    const updatedImages = [];
-    for (let i = 0; i < res.locals.images.length; i++) {
-      updatedImages.push(res.locals.images[i].filename);
-    }
 
-    req.body.main_image = res.locals.images[0].filename;
-    req.body.images = updatedImages;
+      const updatedImages = [];
+      for (let i = 0; i < res.locals.images.length; i++) {
+        updatedImages.push(res.locals.images[i].filename);
+      }
 
-    const TAGS: any = req.body.tags;
-    let CATE_TAGS = [];
-    if (typeof TAGS == "string") {
-      CATE_TAGS.push(TAGS);
-    } else {
-      CATE_TAGS = TAGS;
-    }
+      req.body.main_image = res.locals.images[0].filename;
+      req.body.images = updatedImages;
 
-    const CATE = req.body.category;
 
-    req.body.tags = CATE_TAGS.map((tag: String) => {
-      return `${CATE}_${tag}`;
-    });
-    console.log(req.body);
-    const productData = await product.create(req.body);
-    console.log("=================");
-    console.log("productData = " + JSON.stringify(productData, null, 4));
+      const CATE_TAGS: any = req.body.tags;
 
-    req.body.id = productData._id;
-    req.body.time = productData.time;
-    req.body.price = productData.price;
-    req.body.colors = productData.colorName;
-    req.body.sizes = productData.size;
+      console.log(CATE_TAGS);
 
-    const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
-    const productId = productData._id.toString();
+      const CATE = req.body.category;
+      console.log(CATE);
 
+      req.body.tags = CATE_TAGS.map((tag: String)=>{
+        return `${CATE}_${tag}`;
+      })
+      console.log(req.body);
+      const productData = await product.create(req.body);
+
+      const productId = productData._id.toString();
+      // console.log(productId);
+      // product.updateOne({_id: productId}, {main_image: res.locals.images[0].filename});
+      
+      // product.updateOne({ _id: productId }, { images: updatedImages });
+      
+    // }
+
+    // if (typeof req.body.color === "string" && req.body.color.length > 0) {
+    //   await productVariantModel.createProductVariants([
+    //     {
+    //       productId,
+    //       color: req.body.color,
+    //       colorName: req.body.colorName,
+    //       size: req.body.size,
+    //       stock: req.body.stock,
+    //     }, 
+    //   ]);
+    // }
+    // if (Array.isArray(req.body.color) && req.body.color.length > 0) {
+    //   const variants = req.body.color.map((color: string, index: number) => {
+    //     return {
+    //       productId,
+    //       color,
+    //       colorName: req.body.colorName[index],
+    //       size: req.body.size[index],
+    //       stock: req.body.stock[index],
+    //     };
+    //   });
+    //   await productVariantModel.createProductVariants(variants);
+    // }
+
+    
     res.status(200).json(productId);
   } catch (err) {
     if (err instanceof Error) {
@@ -289,49 +375,5 @@ export async function createProduct(req: Request, res: Response) {
       return;
     }
     res.status(500).json({ errors: "create product failed" });
-  }
-}
-
-export async function recommendProduct(req: Request, res: Response) {
-  try {
-    const userId = res.locals.userId;
-    const hotProductIds: string[] = [];
-    let hotProducts;
-    // Hot recommendation
-    if (!userId) {
-      hotProducts = await product.find({ _id: { $in: hotProductIds } });
-
-      return res.status(200).json({ data: [hotProducts] });
-    }
-
-    // Personal recommendation
-    const sortedSetKey = `${userId}BrowsingHistoryCounter`;
-    let tag;
-    const mostFrequentTag = await redis.zrevrange(
-      sortedSetKey,
-      0,
-      0,
-      "WITHSCORES"
-    );
-
-    if (mostFrequentTag.length > 0) {
-      tag = mostFrequentTag[0];
-    } else {
-      tag = null;
-    }
-
-    if (tag) {
-      const productsData = await product
-        .find({ tags: { $in: tag } })
-        .skip(0)
-        .limit(10);
-
-      return res.status(200).json({ data: [productsData] });
-    }
-
-    res.status(200).json({ data: [hotProducts] });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ errors: "save images failed" });
   }
 }
