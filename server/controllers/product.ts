@@ -22,15 +22,26 @@ function resp(productsData: any, next_paging: any = -1) {
   if (next_paging === -1) {
     const resData = {
       data: [productsData].map((i: any) => {
-        const colors: any = [];
+
+        const colorsSet = new Set();
+        const sizesSet = new Set();
+        // i.color.forEach((color: any, index: number) => {
+        //   colors.push({
+        //     code: color,
+        //     name: i.colorName[index],
+        //   });
+        // });
         i.color.forEach((color: any, index: number) => {
-          colors.push({
-            code: color,
-            name: i.colorName[index],
-          });
+          colorsSet.add(JSON.stringify({ code: color, name: i.colorName[index] }));
+          sizesSet.add(i.size[index]);
         });
 
-        const sizes = i.size;
+        const colors = Array.from(colorsSet).map((colorString: any) => JSON.parse(colorString));
+        const sizes = Array.from(sizesSet).map((size: any) => size);
+
+
+        // const colors = Array.from(colorsSet).map(JSON.parse);
+        // const sizes = Array.from(sizesSet);
 
         const variants: any = [];
         i.color.forEach((color: any, index: number) => {
@@ -105,13 +116,15 @@ function resp(productsData: any, next_paging: any = -1) {
       }),
       next_paging,
     };
+    if(next_paging === null){
+      delete resData.next_paging;
+    }
     return resData;
   }
 }
 
 export async function getProducts(req: Request, res: Response) {
   try {
-    console.log("======================");
 
     const paging = Number(req.query.paging) || 0;
     const category = req.params.category;
