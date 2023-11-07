@@ -55,7 +55,7 @@ export async function signIn(req, res) {
         }
         const token = await signJWT(user.id);
         res
-            .cookie("jwtToken", token, COOKIE_OPTIONS)
+            .cookie("jwtToken", token)
             .status(200)
             .json({
             data: {

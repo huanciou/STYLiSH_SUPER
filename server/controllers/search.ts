@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { searchProductsIdsFromElastic } from "../models/searchProduct.js";
+import { searchProductsIdsFromElastic } from "../models/elasticsearch.js";
 
 export async function searchProductsId(
   req: Request,
@@ -17,7 +17,7 @@ export async function searchProductsId(
   const sorting =
     typeof req.query.sorting === "string" ? req.query.sorting : "popular";
 
-  console.log(color, size, category, sorting);
+  // console.log(color, size, category, sorting);
 
   const productsIds = await searchProductsIdsFromElastic(
     paging,
@@ -30,6 +30,7 @@ export async function searchProductsId(
 
   // If there're 7 ids, meaning there's next page
   // The ids are sorted already
+
   req.body.productIds = productsIds;
 
   next();

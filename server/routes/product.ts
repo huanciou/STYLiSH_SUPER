@@ -21,11 +21,12 @@ router.route("/products").get(getProducts);
 router
   .route("/products/search")
   .get(
-    query("keyword").not().isEmpty().trim(),
+    query("keyword").trim(),
     query("paging").if(query("paging").exists()).isInt(),
     query("category").if(query("category").exists()).isString(),
     validator.handleResult,
-    searchProductsId
+    searchProductsId,
+    searchProducts
   );
 
 router

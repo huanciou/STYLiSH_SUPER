@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 dotenv.config();
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+const PRODUCTS_PER_PAGE = 6;
+
 const client = new Client({
   node: {
     url: new URL(process.env.ELASTICSEARCH_NODE || "undefined"),
@@ -25,9 +27,11 @@ export async function uploadProductsToElasticSearch(productData: {
     name: string;
   }[];
   sizes: string[];
+  time: number;
 }) {
   try {
-    const { id, category, tags, title, price, colors, sizes } = productData;
+    const { id, category, tags, title, price, colors, sizes, time } =
+      productData;
 
     const createResult = await client.index({
       index: "products",
@@ -40,17 +44,123 @@ export async function uploadProductsToElasticSearch(productData: {
         price,
         colors,
         sizes,
+        time,
       },
     });
-
-    console.log(createResult);
   } catch (err) {
     console.log(err);
     console.log("something is wrong creating product to elasticsearch");
   }
 }
 
-export async function addClickToElasticSearch(productId: number) {
+export async function searchProductsIdsFromElastic(
+  paging: number,
+  keyword: string,
+  color: string,
+  size: string,
+  category: string,
+  sorting: string
+) {
+  const must = [];
+
+  if (keyword) {
+    console.log("keyword exist~~~~~~");
+
+    must.push({
+      match: {
+        title: keyword,
+      },
+    });
+  }
+
+  if (color) {
+    must.push({
+      match: {
+        "colors.name": color,
+      },
+    });
+  }
+
+  if (size) {
+    must.push({
+      match: {
+        sizes: size,
+      },
+    });
+  }
+
+  if (category) {
+    must.push({
+      match: {
+        category: category,
+      },
+    });
+  }
+
+  let sorts: any;
+
+  if (sorting === "newest") {
+    console.log("newest~~~~~~~~~~~~~~~~~~~~~~~");
+    //sorts = "time:desc";
+    sorts = {
+      time: {
+        order: "desc",
+      },
+    };
+  } else if (sorting === "price_asc") {
+    //sorts = "price:asc";
+    sorts = {
+      price: { order: "asc" },
+    };
+  } else if (sorting === "price_desc") {
+    //sorts = "price:desc";
+    sorts = {
+      price: { order: "desc" },
+    };
+  } else {
+    //sorts = "click:desc";
+    sorts = {
+      click: { order: "desc" },
+    };
+  }
+
+  const result: any = await client.search({
+    index: "products",
+
+    _source: [
+      "id",
+      "category",
+      "tags",
+      "click",
+      "title",
+      "price",
+      "colors",
+      "sizes",
+    ],
+    body: {
+      sort: [sorts],
+      size: PRODUCTS_PER_PAGE + 1,
+      from: PRODUCTS_PER_PAGE * paging,
+
+      query: {
+        bool: {
+          must: must,
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+    },
+  });
+
+  console.log(JSON.stringify(result, null, 4));
+
+  return result.hits.hits.map((product: any) => {
+    return product["_source"]["id"];
+  });
+}
+
+export async function addClickToElasticSearch(productId: string) {
   try {
     const addResult = await client.updateByQuery({
       index: "products",
@@ -63,7 +173,7 @@ export async function addClickToElasticSearch(productId: number) {
             must: [
               {
                 match: {
-                  id: productId,
+                  _id: productId,
                 },
               },
             ],

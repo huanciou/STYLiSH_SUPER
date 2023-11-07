@@ -7,12 +7,16 @@ import { fileTypeFromBuffer } from "file-type";
 import { product } from "../schema/schema.js";
 import { Redis } from "ioredis";
 import { uploadProductsToElasticSearch } from "../models/elasticsearch.js";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 export const redis = new Redis({
   host: process.env.REDIS_HOST,
   password: process.env.REDIS_PASSWORD,
   // commandTimeout: 300,
 });
+
+const DOMAIN_NAME = process.env.DOMAIN_NAME;
 
 export async function getProducts(req: Request, res: Response) {
   try {
@@ -40,6 +44,13 @@ export async function getProducts(req: Request, res: Response) {
     } else {
       next_paging = null;
     }
+
+    productsData.forEach((product) => {
+      product.main_image = DOMAIN_NAME + product.main_image;
+      product.images.forEach((image, index) => {
+        product.images[index] = DOMAIN_NAME + product.images[index];
+      });
+    });
 
     res.status(200).json({ data: [productsData], next_paging });
   } catch (err) {
@@ -78,6 +89,13 @@ export async function getProduct(req: Request, res: Response) {
       }
     });
 
+    if (productData) {
+      productData.main_image = DOMAIN_NAME + productData.main_image;
+      productData.images.forEach((image, index) => {
+        productData.images[index] = DOMAIN_NAME + productData.images[index];
+      });
+    }
+
     res.json({ data: [productData] });
   } catch (err) {
     console.error(err);
@@ -91,28 +109,49 @@ export async function getProduct(req: Request, res: Response) {
 
 export async function searchProducts(req: Request, res: Response) {
   try {
+    const { productIds } = req.body;
     const paging = Number(req.query.paging) || 0;
-    const keyword =
-      typeof req.query.keyword === "string" ? req.query.keyword : "";
-    const PAGE_COUNT = 7;
-    const PAGE_SKIP = 6;
 
-    const productsData = await product
-      .find({
-        title: { $regex: keyword, $options: "i" },
-      })
-      .sort({ id: 1 })
-      .skip(paging * PAGE_SKIP)
-      .limit(PAGE_COUNT);
+    const productsData = await product.find({
+      _id: { $in: productIds },
+    });
+
+    // console.log("=================");
+
+    // console.log(productIds);
+    // console.log(JSON.stringify(productsData, null, 4));
+    // console.log("=================");
+
+    const sortingMap = new Map();
+    productIds.forEach((id: string, index: number) => {
+      sortingMap.set(`"${id}"`, index);
+    });
+
+    const sortedData: Array<string> = [];
+
+    productsData.forEach((product) => {
+      product.main_image = DOMAIN_NAME + product.main_image;
+      product.images.forEach((image, index) => {
+        product.images[index] = DOMAIN_NAME + product.images[index];
+      });
+    });
+
+    productsData.forEach((data: any, index: number) => {
+      const dataIdString = JSON.stringify(data._id);
+
+      sortedData[sortingMap.get(dataIdString)] = data;
+    });
 
     let next_paging: number | null = paging + 1;
-    if (productsData.length > 6) {
-      productsData.pop();
+
+    if (sortedData.length > 6) {
+      sortedData.pop();
     } else {
       next_paging = null;
     }
+    console.log(JSON.stringify(sortedData, null, 4));
 
-    res.json({ data: [productsData], next_paging });
+    res.json({ data: [sortedData], next_paging });
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -216,19 +255,31 @@ export async function createProduct(req: Request, res: Response) {
     req.body.main_image = res.locals.images[0].filename;
     req.body.images = updatedImages;
 
-    const CATE_TAGS: any = req.body.tags;
-
-    console.log(CATE_TAGS);
+    const TAGS: any = req.body.tags;
+    let CATE_TAGS = [];
+    if (typeof TAGS == "string") {
+      CATE_TAGS.push(TAGS);
+    } else {
+      CATE_TAGS = TAGS;
+    }
 
     const CATE = req.body.category;
-    console.log(CATE);
 
     req.body.tags = CATE_TAGS.map((tag: String) => {
       return `${CATE}_${tag}`;
     });
     console.log(req.body);
     const productData = await product.create(req.body);
+    console.log("=================");
+    console.log("productData = " + JSON.stringify(productData, null, 4));
 
+    req.body.id = productData._id;
+    req.body.time = productData.time;
+    req.body.price = productData.price;
+    req.body.colors = productData.colorName;
+    req.body.sizes = productData.size;
+
+    const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
     const productId = productData._id.toString();
 
     res.status(200).json(productId);
@@ -270,7 +321,10 @@ export async function recommendProduct(req: Request, res: Response) {
     }
 
     if (tag) {
-      const productsData = await product.find({ tags: { $in: tag } })
+      const productsData = await product
+        .find({ tags: { $in: tag } })
+        .skip(0)
+        .limit(10);
 
       return res.status(200).json({ data: [productsData] });
     }

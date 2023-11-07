@@ -49,6 +49,7 @@ export async function signUp(req: Request, res: Response) {
 export async function signIn(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
+
     const user = await userModel.findUser(email);
     if (!user) {
       throw new Error("user not exist");
@@ -61,8 +62,9 @@ export async function signIn(req: Request, res: Response) {
       throw new Error("invalid password");
     }
     const token = await signJWT(user.id);
+
     res
-      .cookie("jwtToken", token, COOKIE_OPTIONS)
+      .cookie("jwtToken", token)
       .status(200)
       .json({
         data: {
