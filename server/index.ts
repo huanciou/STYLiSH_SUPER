@@ -13,9 +13,14 @@ import { errorHandler } from "./utils/errorHandler.js";
 import morganBody from "morgan-body";
 import fs from "fs";
 import "./models/mongo.js";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
+
+/////////
+app.use(cors());
+/////////
 
 app.use(cookieParser());
 
