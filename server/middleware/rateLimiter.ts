@@ -20,9 +20,11 @@ async function isExcessQuota(token: string) {
 const rateLimiter = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.ip;
-    if (await isExcessQuota(token)) {
-      res.status(429).send(`Quota of ${QUOTA} per ${WINDOW}sec exceeded`);
-      return;
+    if (token) {
+      if (await isExcessQuota(token)) {
+        res.status(429).send(`Quota of ${QUOTA} per ${WINDOW}sec exceeded`);
+        return;
+      }
     }
     next();
   } catch (e) {
