@@ -18,8 +18,101 @@ export const redis = new Redis({
 
 const DOMAIN_NAME = process.env.DOMAIN_NAME;
 
+function resp(productsData: any, next_paging: any = -1) {
+  if (next_paging === -1) {
+    const resData = {
+      data: [productsData].map((i: any) => {
+        const colors: any = [];
+        i.color.forEach((color: any, index: number) => {
+          colors.push({
+            code: color,
+            name: i.colorName[index],
+          });
+        });
+
+        const sizes = i.size;
+
+        const variants: any = [];
+        i.color.forEach((color: any, index: number) => {
+          variants.push({
+            color_code: color,
+            size: sizes[index],
+            stock: i.stock[index],
+          });
+        });
+
+        return {
+          id: i._id,
+          category: i.category,
+          tags: i.tags,
+          title: i.title,
+          description: i.description,
+          price: i.price,
+          texture: i.texture,
+          wash: i.wash,
+          place: i.place,
+          note: i.note,
+          story: i.story,
+          colors,
+          sizes,
+          variants,
+          main_image: i.main_image,
+          images: i.images,
+        };
+      }),
+    };
+    return resData;
+  } else {
+    const resData = {
+      data: productsData.map((i: any) => {
+        const colors: any = [];
+        i.color.forEach((color: any, index: number) => {
+          colors.push({
+            code: color,
+            name: i.colorName[index],
+          });
+        });
+
+        const sizes = i.size;
+
+        const variants: any = [];
+        i.color.forEach((color: any, index: number) => {
+          variants.push({
+            color_code: color,
+            size: sizes[index],
+            stock: i.stock[index],
+          });
+        });
+
+        return {
+          id: i._id,
+          category: i.category,
+          tags: i.tags,
+          title: i.title,
+          description: i.description,
+          price: i.price,
+          texture: i.texture,
+          wash: i.wash,
+          place: i.place,
+          note: i.note,
+          story: i.story,
+          colors,
+          sizes,
+          variants,
+          main_image: i.main_image,
+          images: i.images,
+        };
+      }),
+      next_paging,
+    };
+    return resData;
+  }
+}
+
 export async function getProducts(req: Request, res: Response) {
   try {
+    console.log("======================");
+
     const paging = Number(req.query.paging) || 0;
     const category = req.params.category;
     const PAGE_COUNT = 7;
@@ -28,12 +121,29 @@ export async function getProducts(req: Request, res: Response) {
     if (category === "all") {
       const productsData = await product
         .find()
-        .skip(paging * PAGE_COUNT)
+        .skip(paging * PAGE_SKIP)
         .limit(PAGE_COUNT);
-      return res.json({ data: [productsData] });
+      console.log(paging);
+      let next_paging: number | null = paging + 1;
+      if (productsData.length > 6) {
+        productsData.pop();
+      } else {
+        next_paging = null;
+      }
+
+      console.log(JSON.stringify(productsData, null, 4));
+      productsData.forEach((pd, index) => {
+        pd.main_image = DOMAIN_NAME + pd.main_image;
+        pd.images.forEach((image, ind) => {
+          pd.images[ind] = DOMAIN_NAME + pd.images[ind];
+        });
+      });
+
+      const resData = resp(productsData, next_paging);
+      return res.json(resData);
     }
 
-    const productsData = await product
+    const productsData: any = await product
       .find({ category })
       .skip(paging * PAGE_SKIP)
       .limit(PAGE_COUNT);
@@ -45,14 +155,17 @@ export async function getProducts(req: Request, res: Response) {
       next_paging = null;
     }
 
-    productsData.forEach((product) => {
-      product.main_image = DOMAIN_NAME + product.main_image;
-      product.images.forEach((image, index) => {
-        product.images[index] = DOMAIN_NAME + product.images[index];
+    console.log(JSON.stringify(productsData, null, 4));
+
+    productsData.forEach((pd: any, index: any) => {
+      pd.main_image = DOMAIN_NAME + pd.main_image;
+      pd.images.forEach((image: any, ind: any) => {
+        pd.images[ind] = DOMAIN_NAME + pd.images[ind];
       });
     });
 
-    res.status(200).json({ data: [productsData], next_paging });
+    const resData = resp(productsData, next_paging);
+    res.json(resData);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ data: [] });
@@ -96,7 +209,8 @@ export async function getProduct(req: Request, res: Response) {
       });
     }
 
-    res.json({ data: [productData] });
+    const resData = resp(productData);
+    res.json(resData);
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -151,7 +265,8 @@ export async function searchProducts(req: Request, res: Response) {
     }
     console.log(JSON.stringify(sortedData, null, 4));
 
-    res.json({ data: [sortedData], next_paging });
+    const resData = resp(productsData, next_paging);
+    res.json(resData);
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -335,5 +450,3 @@ export async function recommendProduct(req: Request, res: Response) {
     return res.status(500).json({ errors: "save images failed" });
   }
 }
-
-// function changeDbProductStyleToAPI(product) {}
