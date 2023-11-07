@@ -70,6 +70,8 @@ export async function searchProductsIdsFromElastic(
   const must = [];
 
   if (keyword) {
+    console.log("keyword exist~~~~~~");
+
     must.push({
       match: {
         title: keyword,
@@ -141,20 +143,18 @@ export async function searchProductsIdsFromElastic(
       "colors",
       "sizes",
     ],
-    sort: [
-      {
-        time: "asc",
-      },
-    ],
-    size: PRODUCTS_PER_PAGE + 1,
-    from: PRODUCTS_PER_PAGE * paging,
+    body: {
+      sort: [sorts],
+      size: PRODUCTS_PER_PAGE + 1,
+      from: PRODUCTS_PER_PAGE * paging,
 
-    query: {
-      bool: {
-        must: must,
-        filter: [],
-        should: [],
-        must_not: [],
+      query: {
+        bool: {
+          must: must,
+          filter: [],
+          should: [],
+          must_not: [],
+        },
       },
     },
   });

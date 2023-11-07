@@ -50,6 +50,9 @@ export async function signUp(req: Request, res: Response) {
 export async function signIn(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
+    console.log(email);
+    console.log(password);
+
     const user = await userModel.findUser(email);
     if (!user) {
       throw new Error("user not exist");
