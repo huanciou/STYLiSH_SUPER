@@ -17,7 +17,6 @@ export async function signUp(req, res) {
         const userId = await userModel.createUser(email, name);
         await userProviderModel.createNativeProvider(userId, password);
         const token = await signJWT(userId);
-        console.log(token);
         res
             .cookie("jwtToken", token, COOKIE_OPTIONS)
             .status(200)
@@ -46,8 +45,6 @@ export async function signUp(req, res) {
 export async function signIn(req, res) {
     try {
         const { email, password } = req.body;
-        console.log(email);
-        console.log(password);
         const user = await userModel.findUser(email);
         if (!user) {
             throw new Error("user not exist");
@@ -57,8 +54,6 @@ export async function signIn(req, res) {
             throw new Error("invalid password");
         }
         const token = await signJWT(user.id);
-        console.log("===================");
-        console.log(token);
         res
             .cookie("jwtToken", token)
             .status(200)

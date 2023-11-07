@@ -93,29 +93,40 @@ export async function searchProducts(req: Request, res: Response) {
   try {
     const { productIds } = req.body;
     const paging = Number(req.query.paging) || 0;
-    console.log("===============");
-    console.log("searching product");
-    console.log(productIds);
-
-    console.log("===============");
-
-    // const keyword =
-    //   typeof req.query.keyword === "string" ? req.query.keyword : "";
-    // const PAGE_COUNT = 7;
-    // const PAGE_SKIP = 6;
 
     const productsData = await product.find({
       _id: { $in: productIds },
     });
 
+    // console.log("=================");
+
+    // console.log(productIds);
+    // console.log(JSON.stringify(productsData, null, 4));
+    // console.log("=================");
+
+    const sortingMap = new Map();
+    productIds.forEach((id: string, index: number) => {
+      sortingMap.set(`"${id}"`, index);
+    });
+
+    const sortedData: Array<string> = [];
+
+    productsData.forEach((data: any, index: number) => {
+      const dataIdString = JSON.stringify(data._id);
+
+      sortedData[sortingMap.get(dataIdString)] = data;
+    });
+
     let next_paging: number | null = paging + 1;
-    if (productsData.length > 6) {
-      productsData.pop();
+
+    if (sortedData.length > 6) {
+      sortedData.pop();
     } else {
       next_paging = null;
     }
+    console.log(JSON.stringify(sortedData, null, 4));
 
-    res.json({ data: [productsData], next_paging });
+    res.json({ data: [sortedData], next_paging });
   } catch (err) {
     console.error(err);
     if (err instanceof Error) {
@@ -227,10 +238,7 @@ export async function createProduct(req: Request, res: Response) {
       CATE_TAGS = TAGS;
     }
 
-    console.log(CATE_TAGS);
-
     const CATE = req.body.category;
-    console.log(CATE);
 
     req.body.tags = CATE_TAGS.map((tag: String) => {
       return `${CATE}_${tag}`;
@@ -245,10 +253,6 @@ export async function createProduct(req: Request, res: Response) {
     req.body.price = productData.price;
     req.body.colors = productData.colorName;
     req.body.sizes = productData.size;
-    console.log("=================");
-    console.log("product mongo id = " + req.body.id);
-
-    console.log("=================");
 
     const uploadElasticSearch = await uploadProductsToElasticSearch(req.body);
     const productId = productData._id.toString();

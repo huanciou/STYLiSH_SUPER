@@ -9,7 +9,7 @@ const router = Router();
 router.route("/products").get(getProducts);
 router
     .route("/products/search")
-    .get(query("keyword").not().isEmpty().trim(), query("paging").if(query("paging").exists()).isInt(), query("category").if(query("category").exists()).isString(), validator.handleResult, searchProductsId, searchProducts);
+    .get(query("keyword").trim(), query("paging").if(query("paging").exists()).isInt(), query("category").if(query("category").exists()).isString(), validator.handleResult, searchProductsId, searchProducts);
 router
     .route("/products/details")
     .get(query("id").not().isEmpty().trim(), validator.handleResult, whoRU, getProduct);

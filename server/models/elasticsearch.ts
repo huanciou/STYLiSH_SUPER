@@ -33,12 +33,6 @@ export async function uploadProductsToElasticSearch(productData: {
     const { id, category, tags, title, price, colors, sizes, time } =
       productData;
 
-    console.log("=============");
-    console.log("time is:" + time);
-
-    console.log("=============");
-    console.log(typeof price);
-
     const createResult = await client.index({
       index: "products",
       body: {
@@ -162,10 +156,6 @@ export async function searchProductsIdsFromElastic(
   console.log(JSON.stringify(result, null, 4));
 
   return result.hits.hits.map((product: any) => {
-    console.log("~~~~~~~~~~~~~~~~~~~~~");
-    console.log(product["_source"]["id"]);
-    console.log("~~~~~~~~~~~~~~~~~~~~~");
-
     return product["_source"]["id"];
   });
 }
