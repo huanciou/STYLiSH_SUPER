@@ -17,6 +17,8 @@ export async function searchProductsId(
   const sorting =
     typeof req.query.sorting === "string" ? req.query.sorting : "popular";
 
+  console.log(color);
+
   // console.log(color, size, category, sorting);
 
   const productsIds = await searchProductsIdsFromElastic(

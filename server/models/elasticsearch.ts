@@ -76,7 +76,7 @@ export async function searchProductsIdsFromElastic(
   if (color) {
     must.push({
       match: {
-        "colors.name": color,
+        colors: color,
       },
     });
   }
