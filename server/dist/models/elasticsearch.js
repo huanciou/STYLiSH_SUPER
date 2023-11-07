@@ -59,7 +59,7 @@ export async function searchProductsIdsFromElastic(paging, keyword, color, size,
             },
         });
     }
-    if (category) {
+    if (category && category !== "all") {
         must.push({
             match: {
                 category: category,
