@@ -7,12 +7,16 @@ import { fileTypeFromBuffer } from "file-type";
 import { product } from "../schema/schema.js";
 import { Redis } from "ioredis";
 import { uploadProductsToElasticSearch } from "../models/elasticsearch.js";
+// import dotenv from "dotenv";
+// dotenv.config();
 
 export const redis = new Redis({
   host: process.env.REDIS_HOST,
   password: process.env.REDIS_PASSWORD,
   // commandTimeout: 300,
 });
+
+const DOMAIN_NAME = process.env.DOMAIN_NAME;
 
 export async function getProducts(req: Request, res: Response) {
   try {
@@ -40,6 +44,13 @@ export async function getProducts(req: Request, res: Response) {
     } else {
       next_paging = null;
     }
+
+    productsData.forEach((product) => {
+      product.main_image = DOMAIN_NAME + product.main_image;
+      product.images.forEach((image, index) => {
+        product.images[index] = DOMAIN_NAME + product.images[index];
+      });
+    });
 
     res.status(200).json({ data: [productsData], next_paging });
   } catch (err) {
@@ -78,6 +89,13 @@ export async function getProduct(req: Request, res: Response) {
       }
     });
 
+    if (productData) {
+      productData.main_image = DOMAIN_NAME + productData.main_image;
+      productData.images.forEach((image, index) => {
+        productData.images[index] = DOMAIN_NAME + productData.images[index];
+      });
+    }
+
     res.json({ data: [productData] });
   } catch (err) {
     console.error(err);
@@ -110,6 +128,13 @@ export async function searchProducts(req: Request, res: Response) {
     });
 
     const sortedData: Array<string> = [];
+
+    productsData.forEach((product) => {
+      product.main_image = DOMAIN_NAME + product.main_image;
+      product.images.forEach((image, index) => {
+        product.images[index] = DOMAIN_NAME + product.images[index];
+      });
+    });
 
     productsData.forEach((data: any, index: number) => {
       const dataIdString = JSON.stringify(data._id);
