@@ -19,18 +19,18 @@ export const redis = new Redis({
 const DOMAIN_NAME = process.env.DOMAIN_NAME;
 
 function resp(productsData: any, next_paging: any = -1) {
-  if (next_paging === -1) {
+ 
     const resData = {
-      data: [productsData].map((i: any) => {
+      data: productsData.map((i: any) => {
+
+        // console.log(i.size);
+        const copyArr = i.size;
+        const changeSizes = [...copyArr];
+        // console.log(changeSizes);
 
         const colorsSet = new Set();
         const sizesSet = new Set();
-        // i.color.forEach((color: any, index: number) => {
-        //   colors.push({
-        //     code: color,
-        //     name: i.colorName[index],
-        //   });
-        // });
+
         i.color.forEach((color: any, index: number) => {
           colorsSet.add(JSON.stringify({ code: color, name: i.colorName[index] }));
           sizesSet.add(i.size[index]);
@@ -39,18 +39,26 @@ function resp(productsData: any, next_paging: any = -1) {
         const colors = Array.from(colorsSet).map((colorString: any) => JSON.parse(colorString));
         const sizes = Array.from(sizesSet).map((size: any) => size);
 
-
-        // const colors = Array.from(colorsSet).map(JSON.parse);
-        // const sizes = Array.from(sizesSet);
+        const customSizeOrder = ['XS', 'S', 'M', 'L', 'XL'];
+        
+        
+        sizes.sort((a,b) => {
+          return customSizeOrder.indexOf(a) - customSizeOrder.indexOf(b);
+        })
 
         const variants: any = [];
+
         i.color.forEach((color: any, index: number) => {
           variants.push({
             color_code: color,
-            size: sizes[index],
+            size: changeSizes[index],
             stock: i.stock[index],
           });
         });
+        
+        const copyImg = i.images;
+        const changeImg = [...copyImg];
+        changeImg.shift();
 
         return {
           id: i._id,
@@ -68,60 +76,17 @@ function resp(productsData: any, next_paging: any = -1) {
           sizes,
           variants,
           main_image: i.main_image,
-          images: i.images,
-        };
-      }),
-    };
-    return resData;
-  } else {
-    const resData = {
-      data: productsData.map((i: any) => {
-        const colors: any = [];
-        i.color.forEach((color: any, index: number) => {
-          colors.push({
-            code: color,
-            name: i.colorName[index],
-          });
-        });
-
-        const sizes = i.size;
-
-        const variants: any = [];
-        i.color.forEach((color: any, index: number) => {
-          variants.push({
-            color_code: color,
-            size: sizes[index],
-            stock: i.stock[index],
-          });
-        });
-
-        return {
-          id: i._id,
-          category: i.category,
-          tags: i.tags,
-          title: i.title,
-          description: i.description,
-          price: i.price,
-          texture: i.texture,
-          wash: i.wash,
-          place: i.place,
-          note: i.note,
-          story: i.story,
-          colors,
-          sizes,
-          variants,
-          main_image: i.main_image,
-          images: i.images,
+          images: changeImg,
         };
       }),
       next_paging,
     };
-    if(next_paging === null){
+    if(next_paging === null || next_paging === -1){
       delete resData.next_paging;
     }
+
     return resData;
   }
-}
 
 export async function getProducts(req: Request, res: Response) {
   try {
@@ -136,7 +101,7 @@ export async function getProducts(req: Request, res: Response) {
         .find()
         .skip(paging * PAGE_SKIP)
         .limit(PAGE_COUNT);
-      console.log(paging);
+      // console.log(paging);
       let next_paging: number | null = paging + 1;
       if (productsData.length > 6) {
         productsData.pop();
@@ -144,7 +109,7 @@ export async function getProducts(req: Request, res: Response) {
         next_paging = null;
       }
 
-      console.log(JSON.stringify(productsData, null, 4));
+      // console.log(JSON.stringify(productsData, null, 4));
       productsData.forEach((pd, index) => {
         pd.main_image = DOMAIN_NAME + pd.main_image;
         pd.images.forEach((image, ind) => {
@@ -168,7 +133,7 @@ export async function getProducts(req: Request, res: Response) {
       next_paging = null;
     }
 
-    console.log(JSON.stringify(productsData, null, 4));
+    // console.log(JSON.stringify(productsData, null, 4));
 
     productsData.forEach((pd: any, index: any) => {
       pd.main_image = DOMAIN_NAME + pd.main_image;
@@ -222,7 +187,7 @@ export async function getProduct(req: Request, res: Response) {
       });
     }
 
-    const resData = resp(productData);
+    const resData = resp([productData]);
     res.json(resData);
   } catch (err) {
     console.error(err);
@@ -242,6 +207,7 @@ export async function searchProducts(req: Request, res: Response) {
     const productsData = await product.find({
       _id: { $in: productIds },
     });
+    console.log(productsData);
 
     // console.log("=================");
 
@@ -276,7 +242,7 @@ export async function searchProducts(req: Request, res: Response) {
     } else {
       next_paging = null;
     }
-    console.log(JSON.stringify(sortedData, null, 4));
+    // console.log(JSON.stringify(sortedData, null, 4));
 
     const resData = resp(productsData, next_paging);
     res.json(resData);
@@ -396,10 +362,10 @@ export async function createProduct(req: Request, res: Response) {
     req.body.tags = CATE_TAGS.map((tag: String) => {
       return `${CATE}_${tag}`;
     });
-    console.log(req.body);
+    // console.log(req.body);
     const productData = await product.create(req.body);
-    console.log("=================");
-    console.log("productData = " + JSON.stringify(productData, null, 4));
+    // console.log("=================");
+    // console.log("productData = " + JSON.stringify(productData, null, 4));
 
     req.body.id = productData._id;
     req.body.time = productData.time;
